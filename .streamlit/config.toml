@@ -10,6 +10,7 @@ showSidebarNavigation = false
 
 [server]
 headless = true
+enableStaticServing = true
 
 [browser]
 gatherUsageStats = false

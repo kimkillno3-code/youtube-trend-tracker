@@ -257,6 +257,23 @@ def inject_custom_css():
         color: #C9D1D9; font-size: 0.82rem; margin-top: 4px;
         font-weight: 400; position: relative;
     }
+    .page-header .guide-link {
+        position: absolute; top: 20px; right: 24px;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 8px;
+        padding: 6px 14px;
+        color: #C9D1D9;
+        font-size: 0.75rem; font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        z-index: 1;
+    }
+    .page-header .guide-link:hover {
+        background: rgba(255,255,255,0.1);
+        color: #F0F2F5;
+        border-color: rgba(255,255,255,0.2);
+    }
 
     /* ═══════════════════════════════════
        METRIC CARD
@@ -1162,6 +1179,15 @@ def _inject_light_overrides():
     }
     .page-header h1 { color: #24292F !important; }
     .page-header .subtitle { color: #656D76 !important; }
+    .page-header .guide-link {
+        background: rgba(0,0,0,0.04) !important;
+        border-color: rgba(0,0,0,0.1) !important;
+        color: #656D76 !important;
+    }
+    .page-header .guide-link:hover {
+        background: rgba(0,0,0,0.08) !important;
+        color: #24292F !important;
+    }
 
     .metric-card {
         background: #FFFFFF !important;
@@ -1435,13 +1461,20 @@ def _inject_light_overrides():
 # 렌더링 함수
 # ═══════════════════════════════════
 
-def render_page_header(title: str, subtitle: str = "") -> None:
+def render_page_header(title: str, subtitle: str = "",
+                       show_guide: bool = True) -> None:
     sub_html = (
         f'<div class="subtitle">{html_lib.escape(subtitle)}</div>'
         if subtitle else ""
     )
+    guide_html = (
+        '<a class="guide-link" href="./static/guide.html" target="_blank">'
+        '? 사용자 가이드</a>'
+        if show_guide else ""
+    )
     st.markdown(
-        f'<div class="page-header"><h1>{html_lib.escape(title)}</h1>{sub_html}</div>',
+        f'<div class="page-header">{guide_html}'
+        f'<h1>{html_lib.escape(title)}</h1>{sub_html}</div>',
         unsafe_allow_html=True,
     )
 
