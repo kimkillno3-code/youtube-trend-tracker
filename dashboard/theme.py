@@ -54,6 +54,13 @@ def inject_custom_css():
     header[data-testid="stHeader"] {
         background: transparent !important;
         border-bottom: none !important;
+        height: 50px !important;
+        min-height: 50px !important;
+        max-height: 50px !important;
+    }
+    .stApp [data-testid="stAppViewContainer"] > .stMainBlockContainer,
+    .stApp .block-container {
+        padding-top: 1rem !important;
     }
     /* 사이드바 토글 버튼: ">>" → 햄버거 아이콘 */
     [data-testid="stSidebarCollapsedControl"],
@@ -755,29 +762,46 @@ def inject_custom_css():
     _components.html("""
     <script>
     (function(){
+        var doc = window.parent.document;
+
+        // 1) parent document에 CSS 주입
+        var style = doc.createElement('style');
+        style.textContent = [
+            'a[href*="streamlit.io"] { display:none!important; }',
+            'a[href*="streamlit.app"]:not(.stApp a) { display:none!important; }',
+            '[data-testid="manage-app-button"] { display:none!important; }',
+            'footer { display:none!important; }',
+            'div[class*="viewerBadge"] { display:none!important; }',
+            'div[class*="HostButton"] { display:none!important; }',
+            '#MainMenu { display:none!important; }',
+            '[data-testid="stMainMenu"] { display:none!important; }',
+        ].join('\\n');
+        doc.head.appendChild(style);
+
+        // 2) 하단 fixed 배지 제거 함수
         function removeBadges(){
-            var doc = window.parent.document;
-            // position:fixed 하단 요소 중 배지 제거
-            doc.querySelectorAll('a[href*="streamlit.io"], a[href*="streamlit.app"]').forEach(function(el){
-                el.style.display='none';
-                if(el.parentElement) el.parentElement.style.display='none';
-            });
-            // 하단 고정 배지 컨테이너
-            doc.querySelectorAll('[data-testid="manage-app-button"], [data-testid="stStatusWidget"]').forEach(function(el){
-                el.style.display='none';
-            });
-            // body 직속 fixed 요소 중 배지 탐색
-            doc.querySelectorAll('body > div, body > a, body > iframe').forEach(function(el){
+            doc.querySelectorAll('body > div, body > a, body > section, body > aside').forEach(function(el){
+                if(el.querySelector('.stApp')) return;
                 var s = window.parent.getComputedStyle(el);
-                if(s.position==='fixed' && parseInt(s.bottom||'999') < 100 ){
-                    el.style.display='none';
+                if(s.position==='fixed' || s.position==='absolute'){
+                    var b = parseInt(s.bottom||'999');
+                    var r = parseInt(s.right||'999');
+                    if(b < 120 && r < 200){
+                        el.remove();
+                    }
                 }
             });
+            doc.querySelectorAll('img[src*="streamlit"], a[href*="streamlit.io"]').forEach(function(el){
+                var p = el.closest('div,a,section');
+                if(p && !p.closest('.stApp')) p.remove();
+            });
         }
+
+        // 3) MutationObserver — 동적 삽입 감시
         removeBadges();
-        setTimeout(removeBadges, 500);
-        setTimeout(removeBadges, 1500);
-        setTimeout(removeBadges, 3000);
+        var observer = new MutationObserver(function(){ removeBadges(); });
+        observer.observe(doc.body, { childList: true, subtree: true });
+        setTimeout(function(){ observer.disconnect(); }, 10000);
     })();
     </script>
     """, height=0, scrolling=False)
