@@ -1469,7 +1469,7 @@ def render_page_header(title: str, subtitle: str = "",
     )
     guide_html = (
         '<a class="guide-link" href="./static/guide.html" target="_blank">'
-        '? 사용자 가이드</a>'
+        '<b>사용자 가이드</b></a>'
         if show_guide else ""
     )
     st.markdown(
