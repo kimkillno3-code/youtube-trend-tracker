@@ -56,22 +56,34 @@ def inject_custom_css():
         border-bottom: none !important;
     }
     /* 사이드바 토글 버튼: ">>" → 햄버거 아이콘 */
-    [data-testid="stSidebarCollapsedControl"] button {
+    [data-testid="stSidebarCollapsedControl"] button,
+    [data-testid="collapsedControl"] button,
+    button[data-testid="baseButton-headerNoPadding"] {
         background: rgba(255,255,255,0.06) !important;
         border: 1px solid rgba(255,255,255,0.1) !important;
         border-radius: 8px !important;
         width: 36px !important; height: 36px !important;
         display: flex !important; align-items: center !important;
         justify-content: center !important;
+        font-size: 0 !important;
     }
-    [data-testid="stSidebarCollapsedControl"] button svg {
+    [data-testid="stSidebarCollapsedControl"] button svg,
+    [data-testid="collapsedControl"] button svg,
+    button[data-testid="baseButton-headerNoPadding"] svg {
         display: none !important;
     }
-    [data-testid="stSidebarCollapsedControl"] button::after {
+    [data-testid="stSidebarCollapsedControl"] button::after,
+    [data-testid="collapsedControl"] button::after,
+    button[data-testid="baseButton-headerNoPadding"]::after {
         content: '\\2630';
-        font-size: 1.2rem;
+        font-size: 1.2rem !important;
         color: #E6EDF3;
         line-height: 1;
+    }
+    /* Streamlit Cloud Fork/GitHub 버튼 숨김 */
+    [data-testid="stToolbar"],
+    .stApp header [data-testid="stToolbarActions"] {
+        display: none !important;
     }
     /* Streamlit 상단 컬러바 / 런닝 인디케이터 */
     .stApp > div:first-child > div:first-child,
@@ -716,11 +728,15 @@ def _inject_light_overrides():
         color: #24292F !important;
     }
     /* 사이드바 토글 버튼 — 라이트 모드 */
-    [data-testid="stSidebarCollapsedControl"] button {
+    [data-testid="stSidebarCollapsedControl"] button,
+    [data-testid="collapsedControl"] button,
+    button[data-testid="baseButton-headerNoPadding"] {
         background: rgba(0,0,0,0.04) !important;
         border-color: rgba(0,0,0,0.12) !important;
     }
-    [data-testid="stSidebarCollapsedControl"] button::after {
+    [data-testid="stSidebarCollapsedControl"] button::after,
+    [data-testid="collapsedControl"] button::after,
+    button[data-testid="baseButton-headerNoPadding"]::after {
         color: #24292F !important;
     }
 
