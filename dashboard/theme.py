@@ -80,9 +80,9 @@ def inject_custom_css():
         color: #E6EDF3;
         line-height: 1;
     }
-    /* Streamlit Cloud Fork/GitHub 버튼 숨김 */
-    [data-testid="stToolbar"],
-    .stApp header [data-testid="stToolbarActions"] {
+    /* Streamlit Cloud Fork/GitHub 버튼 숨김 (툴바 자체는 유지) */
+    [data-testid="stToolbar"] [data-testid="stToolbarActions"],
+    [data-testid="stToolbar"] .stActionButton {
         display: none !important;
     }
     /* Streamlit 상단 컬러바 / 런닝 인디케이터 */
