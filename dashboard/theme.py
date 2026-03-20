@@ -47,14 +47,14 @@ def inject_custom_css():
     }
     .stApp > header { background: transparent !important; }
     [data-testid="stSidebarNav"] { display: none !important; }
-    /* 상단 장식/바 전부 제거 */
+    /* 상단 장식/바 제거 */
     .stApp [data-testid="stStatusWidget"],
     .stDeployButton,
     [data-testid="stDecoration"],
-    .stDecoration,
-    [data-testid="stToolbar"] { display: none !important; }
-    /* 데스크톱: 헤더 숨김 */
+    .stDecoration { display: none !important; }
+    /* 데스크톱: 헤더+툴바 숨김 */
     @media (min-width: 769px) {
+        [data-testid="stToolbar"] { display: none !important; }
         header[data-testid="stHeader"] {
             background: transparent !important;
             border-bottom: none !important;
@@ -69,6 +69,12 @@ def inject_custom_css():
             height: auto !important;
             min-height: auto !important;
             overflow: visible !important;
+        }
+        [data-testid="stToolbar"] { display: none !important; }
+        button[data-testid="stSidebarCollapsedControl"],
+        [data-testid="collapsedControl"] {
+            display: flex !important;
+            visibility: visible !important;
         }
     }
     /* Streamlit 상단 컬러바 / 런닝 인디케이터 */
