@@ -13,7 +13,7 @@ import streamlit as st
 ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.config import YOUTUBE_API_KEY, DB_PATH, DATA_DIR, KST
+from src.config import YOUTUBE_API_KEY, YOUTUBE_DAILY_QUOTA, DB_PATH, DATA_DIR, KST
 from src.collector.youtube_api import YouTubeAPIClient
 from src.collector.search import search_and_collect
 from src.database.repository import TrendRepository
@@ -30,12 +30,16 @@ from dashboard.theme import (
 )
 
 st.set_page_config(page_title="키워드 검색 - YT", layout="wide")
+st.markdown('<style>[data-testid="stSidebarNav"]{display:none!important}[data-testid="stSidebar"]>div:first-child{opacity:0!important}</style>', unsafe_allow_html=True)
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 repo = TrendRepository(str(DB_PATH))
 
 inject_custom_css()
 sidebar_with_badges(repo, current_page="search")
+
+from dashboard.auth import require_auth
+require_auth()
 
 render_page_header("키워드 검색", "경쟁 영상을 검색하고 한눈에 분석해보세요")
 
@@ -63,6 +67,8 @@ if submitted:
             "3. `YOUTUBE_API_KEY=발급받은키` 입력 후 저장"
         )
         st.stop()
+    elif repo.get_today_quota_used() + 200 >= YOUTUBE_DAILY_QUOTA * 0.9:
+        st.error("오늘 API 할당량이 거의 소진되었어요. 내일 다시 시도해주세요.")
     else:
         api = YouTubeAPIClient(YOUTUBE_API_KEY)
         collected_at = datetime.now(KST).isoformat()

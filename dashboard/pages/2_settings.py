@@ -15,10 +15,15 @@ from dashboard.theme import (
 )
 
 st.set_page_config(page_title="설정 - YT", layout="wide")
+st.markdown('<style>[data-testid="stSidebarNav"]{display:none!important}[data-testid="stSidebar"]>div:first-child{opacity:0!important}</style>', unsafe_allow_html=True)
 
 repo = TrendRepository(str(DB_PATH))
 inject_custom_css()
 sidebar_with_badges(repo, current_page="settings")
+
+from dashboard.auth import require_auth
+require_auth()
+
 render_page_header("설정", "API 키 관리 및 시스템 상태")
 
 
@@ -26,13 +31,7 @@ render_page_header("설정", "API 키 관리 및 시스템 상태")
 st.markdown("#### YouTube API 키")
 
 if YOUTUBE_API_KEY:
-    # 마스킹 처리 (앞 4 + ... + 뒤 4)
-    key_len = len(YOUTUBE_API_KEY)
-    if key_len > 8:
-        masked = YOUTUBE_API_KEY[:4] + "*" * (key_len - 8) + YOUTUBE_API_KEY[-4:]
-    else:
-        masked = "*" * key_len
-    st.success(f"API 키가 등록되어 있어요: `{masked}`")
+    st.success("API 키가 등록되어 있어요")
 else:
     st.error(
         "YouTube API 키가 설정되지 않았어요.\n\n"
@@ -70,7 +69,7 @@ with col2:
     st.markdown(
         render_metric_card(
             f"{remaining:,}", "잔여 할당량", color="green" if remaining > 2000 else "red",
-            hint="자정(태평양 시간) 초기화",
+            hint="매일 오후 4~5시(KST) 초기화",
         ),
         unsafe_allow_html=True,
     )
@@ -87,7 +86,7 @@ with col3:
 st.progress(min(usage_pct / 100, 1.0))
 
 if usage_pct >= 90:
-    st.warning("할당량이 거의 소진되었어요. 내일 자정(태평양 시간) 이후에 초기화됩니다.")
+    st.warning("할당량이 거의 소진되었어요. 오후 4~5시(KST)에 초기화됩니다.")
 elif usage_pct >= 70:
     st.info("할당량의 70%를 사용했어요. 남은 할당량을 확인하며 사용해주세요.")
 

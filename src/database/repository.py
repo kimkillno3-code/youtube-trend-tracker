@@ -232,12 +232,42 @@ class TrendRepository:
             conn.close()
 
     def get_today_quota_used(self) -> int:
-        """오늘(UTC) 사용한 API 할당량 합계를 반환한다."""
+        """오늘(Pacific Time) 사용한 API 할당량 합계를 반환한다.
+
+        YouTube API 할당량은 자정 Pacific Time(PT) 기준으로 리셋되므로
+        PT 날짜의 시작/끝을 UTC로 변환하여 범위 쿼리한다.
+        """
+        from datetime import datetime, timezone, timedelta
+
+        utc_now = datetime.now(timezone.utc)
+        # US Pacific DST: 3월 둘째 일요일 ~ 11월 첫째 일요일
+        year = utc_now.year
+        mar1 = datetime(year, 3, 1, tzinfo=timezone.utc)
+        dst_start = mar1 + timedelta(days=(6 - mar1.weekday()) % 7 + 7)
+        nov1 = datetime(year, 11, 1, tzinfo=timezone.utc)
+        dst_end = nov1 + timedelta(days=(6 - nov1.weekday()) % 7)
+        is_dst = dst_start.replace(hour=10) <= utc_now < dst_end.replace(hour=9)
+        pt_hours = -7 if is_dst else -8
+
+        # PT 오늘 자정 → UTC 변환
+        pt_now = utc_now + timedelta(hours=pt_hours)
+        pt_today_start_utc = (
+            pt_now.replace(hour=0, minute=0, second=0, microsecond=0)
+            - timedelta(hours=pt_hours)
+        ).strftime("%Y-%m-%dT%H:%M:%S")
+        pt_tomorrow_start_utc = (
+            pt_now.replace(hour=0, minute=0, second=0, microsecond=0)
+            + timedelta(days=1)
+            - timedelta(hours=pt_hours)
+        ).strftime("%Y-%m-%dT%H:%M:%S")
+
         conn = self._conn()
         try:
             row = conn.execute(
                 "SELECT COALESCE(SUM(quota_used), 0) AS total "
-                "FROM collection_logs WHERE date(run_started_at) = date('now')"
+                "FROM collection_logs "
+                "WHERE run_started_at >= ? AND run_started_at < ?",
+                (pt_today_start_utc, pt_tomorrow_start_utc),
             ).fetchone()
             return row["total"] if row else 0
         finally:

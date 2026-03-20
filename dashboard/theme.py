@@ -57,12 +57,29 @@ def inject_custom_css():
         height: 50px !important;
         min-height: 50px !important;
         max-height: 50px !important;
+        pointer-events: none !important;
     }
     .stApp [data-testid="stAppViewContainer"] > .stMainBlockContainer,
     .stApp .block-container {
-        padding-top: 1rem !important;
+        padding-top: 0 !important;
     }
-    /* 사이드바 토글 버튼: ">>" → 햄버거 아이콘 */
+    /* autorefresh 컴포넌트 빈 공간 제거 */
+    div[class*="st-key-cmd_center_refresh"],
+    .st-key-cmd_center_refresh,
+    [data-stale] iframe[title*="autorefresh"],
+    .stElementContainer:first-child:has(iframe) {
+        height: 0 !important;
+        min-height: 0 !important;
+        overflow: hidden !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        line-height: 0 !important;
+    }
+    /* 사이드바 내부 상단 스페이서 제거 */
+    .e1dbuyne10 {
+        display: none !important;
+    }
+    /* 사이드바 토글 버튼: ">>" → 햄버거 아이콘 (크기는 Streamlit 기본값 유지) */
     [data-testid="stSidebarCollapsedControl"],
     [data-testid="collapsedControl"] {
         z-index: 999 !important;
@@ -73,13 +90,15 @@ def inject_custom_css():
     header[data-testid="stHeader"] button[data-testid="baseButton-headerNoPadding"] {
         background: rgba(255,255,255,0.06) !important;
         border: 1px solid rgba(255,255,255,0.1) !important;
-        border-radius: 8px !important;
-        width: 36px !important; height: 36px !important;
+        border-radius: 10px !important;
+        width: 48px !important; height: 48px !important;
+        padding: 0 !important;
         display: flex !important; align-items: center !important;
         justify-content: center !important;
         font-size: 0 !important;
         color: transparent !important;
         overflow: hidden !important;
+        cursor: pointer !important;
     }
     [data-testid="stSidebarCollapsedControl"] button > *,
     [data-testid="collapsedControl"] button > *,
@@ -92,9 +111,10 @@ def inject_custom_css():
     header[data-testid="stHeader"] button[kind="headerNoPadding"]::after,
     header[data-testid="stHeader"] button[data-testid="baseButton-headerNoPadding"]::after {
         content: '\\2630' !important;
-        font-size: 1.2rem !important;
+        font-size: 1.4rem !important;
         color: #E6EDF3 !important;
         line-height: 1;
+        pointer-events: none !important;
     }
     /* Streamlit 우측 상단 메뉴 + Fork/GitHub 버튼 숨김 */
     #MainMenu,
@@ -173,6 +193,10 @@ def inject_custom_css():
     section[data-testid="stSidebar"] {
         background: #0B0E14 !important;
         border-right: 1px solid rgba(255,255,255,0.06);
+    }
+    /* 사이드바 상단 빈 공간 제거 */
+    section[data-testid="stSidebar"] > div:first-child {
+        padding-top: 0.5rem !important;
     }
     section[data-testid="stSidebar"] hr {
         border-color: rgba(255,255,255,0.08) !important;
@@ -366,6 +390,141 @@ def inject_custom_css():
     .insight-box strong { color: #F0F2F5; }
 
     /* ═══════════════════════════════════
+       FRESHNESS BAR
+       ═══════════════════════════════════ */
+    .freshness-bar {
+        background: #141820;
+        border: 1px solid rgba(255,255,255,0.06);
+        border-left: 3px solid #36D399;
+        border-radius: 0 10px 10px 0;
+        padding: 10px 16px;
+        font-size: 0.78rem; color: #C9D1D9;
+        font-weight: 500; margin: 0 0 12px;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .freshness-bar .freshness-icon { font-size: 0.85rem; }
+    .freshness-bar .freshness-time { color: #F0F2F5; font-weight: 700; }
+    .freshness-bar .freshness-hint { color: #9BA3B0; margin-left: auto; font-weight: 400; }
+    .freshness-bar.fresh { border-left-color: #36D399; }
+    .freshness-bar.stale { border-left-color: #FBBD23; }
+    .freshness-bar.old   { border-left-color: #FF4757; }
+
+    /* ═══════════════════════════════════
+       KEYWORD CARD (급상승 키워드)
+       ═══════════════════════════════════ */
+    .keyword-card {
+        background: #141820;
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin-bottom: 10px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .keyword-card:hover {
+        border-color: rgba(255,255,255,0.15);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+    .keyword-card .kw-header {
+        display: flex; align-items: center; gap: 10px;
+        margin-bottom: 8px;
+    }
+    .keyword-card .kw-rank {
+        background: rgba(255,71,87,0.15);
+        color: #FF6B81; font-weight: 800; font-size: 0.72rem;
+        padding: 3px 8px; border-radius: 6px; min-width: 28px;
+        text-align: center;
+    }
+    .keyword-card .kw-name {
+        font-size: 0.95rem; font-weight: 700; color: #F0F2F5;
+    }
+    .keyword-card .kw-traffic {
+        margin-left: auto;
+        background: rgba(76,154,255,0.12);
+        color: #4C9AFF; font-weight: 700; font-size: 0.72rem;
+        padding: 3px 10px; border-radius: 20px;
+    }
+    .keyword-card .kw-news {
+        font-size: 0.75rem; color: #9BA3B0; line-height: 1.5;
+        margin-top: 4px;
+    }
+    .keyword-card .kw-news span { color: #C9D1D9; }
+
+    /* ═══════════════════════════════════
+       GAP BAR (키워드 갭 분석)
+       ═══════════════════════════════════ */
+    .gap-card {
+        background: #141820;
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 12px;
+        padding: 16px 18px; margin-bottom: 10px;
+    }
+    .gap-card .gap-keyword {
+        font-size: 0.95rem; font-weight: 700; color: #F0F2F5;
+        margin-bottom: 10px;
+    }
+    .gap-card .gap-score {
+        font-size: 1.4rem; font-weight: 800; margin-bottom: 8px;
+    }
+    .gap-card .gap-score.high { color: #36D399; }
+    .gap-card .gap-score.mid  { color: #FBBD23; }
+    .gap-card .gap-score.low  { color: #FF4757; }
+    .gap-bar-wrap {
+        background: rgba(255,255,255,0.06);
+        border-radius: 6px; height: 8px; overflow: hidden;
+        margin: 6px 0;
+    }
+    .gap-bar-fill {
+        height: 100%; border-radius: 6px;
+        transition: width 0.4s ease;
+    }
+    .gap-bar-fill.demand { background: #4C9AFF; }
+    .gap-bar-fill.supply { background: #FF4757; }
+    .gap-card .gap-meta {
+        display: flex; gap: 12px; margin-top: 8px;
+        font-size: 0.75rem; color: #9BA3B0;
+    }
+    .gap-card .gap-meta strong { color: #F0F2F5; }
+    .gap-badge {
+        display: inline-block;
+        padding: 2px 10px; border-radius: 20px;
+        font-size: 0.7rem; font-weight: 700;
+    }
+    .gap-badge.very-low { background: rgba(54,211,153,0.15); color: #36D399; }
+    .gap-badge.low      { background: rgba(76,154,255,0.15); color: #4C9AFF; }
+    .gap-badge.mid      { background: rgba(251,189,35,0.15); color: #FBBD23; }
+    .gap-badge.high     { background: rgba(255,71,87,0.15); color: #FF6B81; }
+
+    /* ═══════════════════════════════════
+       SEASON TAG (시즌 캘린더)
+       ═══════════════════════════════════ */
+    .season-week {
+        margin-bottom: 16px;
+    }
+    .season-week-label {
+        font-size: 0.82rem; font-weight: 700; color: #F0F2F5;
+        margin-bottom: 8px;
+        padding-left: 12px; border-left: 3px solid #A78BFA;
+    }
+    .season-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .season-tag {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: #1A1F2B;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px; padding: 6px 14px;
+        font-size: 0.8rem; font-weight: 500; color: #C9D1D9;
+    }
+    .season-tag .st-conf {
+        font-size: 0.65rem; font-weight: 700;
+        padding: 1px 6px; border-radius: 10px;
+    }
+    .season-tag .st-conf.high   { background: rgba(54,211,153,0.15); color: #36D399; }
+    .season-tag .st-conf.medium { background: rgba(251,189,35,0.15); color: #FBBD23; }
+    .season-tag .st-cat {
+        font-size: 0.68rem; color: #9BA3B0;
+    }
+
+    /* ═══════════════════════════════════
        FILTER INFO
        ═══════════════════════════════════ */
     .filter-info {
@@ -524,25 +683,43 @@ def inject_custom_css():
     }
 
     /* ═══════════════════════════════════
-       ALERTS — 강제 다크
+       ALERTS — 좌측 액센트 바 스타일
        ═══════════════════════════════════ */
-    .stAlert,
+    .stAlert {
+        background-color: transparent !important;
+        border: none !important;
+        border-left: 3px solid #4C9AFF !important;
+        border-radius: 0 !important;
+        padding: 8px 14px !important;
+    }
     .stAlert > div,
-    [data-baseweb="notification"],
-    [data-baseweb="notification"] > div,
-    .stApp [data-baseweb="notification"] {
-        background-color: #141820 !important;
-        color: #F0F2F5 !important;
-        border: 1px solid rgba(255,255,255,0.06) !important;
-        border-radius: 10px !important;
+    .stAlert [data-baseweb="notification"],
+    .stAlert [data-baseweb="notification"] > div {
+        background-color: transparent !important;
+        border: none !important;
+        border-left: none !important;
+        padding: 0 !important;
     }
-    /* 알림 내부 텍스트 */
-    .stAlert p, .stAlert span,
-    [data-baseweb="notification"] p,
-    [data-baseweb="notification"] span {
-        color: #F0F2F5 !important;
+    /* success — 초록 */
+    .stAlert:has([kind="positive"]),
+    .stAlert:has(svg[data-testid="stIconSuccess"]) {
+        border-left-color: #3FB950 !important;
     }
-    /* 알림 내부 SVG 아이콘 컬러 유지 */
+    /* warning — 주황 */
+    .stAlert:has([kind="warning"]),
+    .stAlert:has(svg[data-testid="stIconWarning"]) {
+        border-left-color: #D29922 !important;
+    }
+    /* error — 빨강 */
+    .stAlert:has([kind="negative"]),
+    .stAlert:has(svg[data-testid="stIconError"]) {
+        border-left-color: #F85149 !important;
+    }
+    /* 알림 텍스트 */
+    .stAlert p, .stAlert span {
+        color: #C9D1D9 !important;
+        font-size: 0.85rem !important;
+    }
     .stAlert svg { min-width: 20px; }
 
     /* Toast */
@@ -666,6 +843,21 @@ def inject_custom_css():
         border-color: rgba(255,255,255,0.15) !important;
         color: #F0F2F5 !important;
     }
+    .stApp [data-testid="stButtonGroup"] button[aria-pressed="true"],
+    .stApp [data-testid="stPills"] button[aria-pressed="true"] {
+        background-color: rgba(255,71,87,0.22) !important;
+        color: #FF6B81 !important;
+        border-color: rgba(255,71,87,0.55) !important;
+        font-weight: 700 !important;
+        box-shadow: 0 0 0 1px rgba(255,71,87,0.55) !important;
+    }
+    .stApp [data-testid="stButtonGroup"] button[aria-pressed="true"] span,
+    .stApp [data-testid="stButtonGroup"] button[aria-pressed="true"] div,
+    .stApp [data-testid="stButtonGroup"] button[aria-pressed="true"] p,
+    .stApp [data-testid="stPills"] button[aria-pressed="true"] span,
+    .stApp [data-testid="stPills"] button[aria-pressed="true"] div {
+        color: #FF6B81 !important;
+    }
 
     /* ═══════════════════════════════════
        기타 STREAMLIT 위젯
@@ -765,19 +957,54 @@ def inject_custom_css():
         var doc = window.parent.document;
         var w = window.parent;
 
-        // 1) parent document에 CSS 주입
-        var style = doc.createElement('style');
-        style.textContent = [
-            'a[href*="streamlit.io"] { display:none!important; }',
-            'a[href*="streamlit.app"]:not(.stApp a) { display:none!important; }',
-            '[data-testid="manage-app-button"] { display:none!important; }',
-            'footer { display:none!important; }',
-            'div[class*="viewerBadge"] { display:none!important; }',
-            'div[class*="HostButton"] { display:none!important; }',
-            '#MainMenu { display:none!important; }',
-            '[data-testid="stMainMenu"] { display:none!important; }',
-        ].join('\\n');
-        doc.head.appendChild(style);
+        // 0) localStorage 토큰 동기화 (보조 — 메인 복원은 서버사이드)
+        try {
+            var _urlTk = new URLSearchParams(w.location.search).get('t');
+            if (_urlTk === '_out') {
+                w.localStorage.removeItem('_yt_auth');
+            } else if (_urlTk) {
+                w.localStorage.setItem('_yt_auth', _urlTk);
+            }
+        } catch(e) {}
+
+        // 1) parent document에 CSS 주입 (페이지 전환에도 유지됨)
+        if (!doc.getElementById('_yt_injected_css')) {
+            var style = doc.createElement('style');
+            style.id = '_yt_injected_css';
+            style.textContent = [
+                '[data-testid="stSidebarNav"] { display:none!important; }',
+                'a[href*="streamlit.io"] { display:none!important; }',
+                'a[href*="streamlit.app"]:not(.stApp a) { display:none!important; }',
+                '[data-testid="manage-app-button"] { display:none!important; }',
+                'footer { display:none!important; }',
+                'div[class*="viewerBadge"] { display:none!important; }',
+                'div[class*="HostButton"] { display:none!important; }',
+                '#MainMenu { display:none!important; }',
+                '[data-testid="stMainMenu"] { display:none!important; }',
+            ].join('\\n');
+            doc.head.appendChild(style);
+        }
+
+        // 1-b) stSidebarNav 제거 + 사이드바 상단 빈 공간 제거
+        function cleanSidebar() {
+            var nav = doc.querySelector('[data-testid="stSidebarNav"]');
+            if (nav) nav.remove();
+            var sep = doc.querySelector('[data-testid="stSidebarNavSeparator"]');
+            if (sep) sep.remove();
+            // 사이드바 내부 첫 번째 빈 div 제거 (Streamlit 내부 스페이서)
+            var sidebar = doc.querySelector('section[data-testid="stSidebar"] > div');
+            if (sidebar) {
+                var first = sidebar.firstElementChild;
+                if (first && !first.textContent.trim() && !first.querySelector('input,button,a')) {
+                    first.style.display = 'none';
+                }
+            }
+        }
+        cleanSidebar();
+        if (!w._ytNavObserver) {
+            w._ytNavObserver = new MutationObserver(cleanSidebar);
+            w._ytNavObserver.observe(doc.body, {childList: true, subtree: true});
+        }
 
         // 2) 하단 fixed 배지 제거 함수
         function removeBadges(){
@@ -805,11 +1032,17 @@ def inject_custom_css():
         setTimeout(function(){ observer.disconnect(); }, 10000);
 
         // 4) 모바일 사이드바 자동 닫기
+        function _removeSidebarHide() {
+            sessionStorage.removeItem('_yt_close_sidebar');
+            var el = doc.getElementById('_yt_hide_sidebar');
+            if (el) el.remove();
+        }
+
         if (w.innerWidth <= 768) {
             var _flag = sessionStorage.getItem('_yt_close_sidebar');
             if (_flag) {
                 var _elapsed = Date.now() - (parseInt(_flag) || 0);
-                if (_elapsed < 5000) {
+                if (_elapsed < 3000) {
                     // (a) CSS로 사이드바 즉시 숨김 (깜빡임 방지)
                     if (!doc.getElementById('_yt_hide_sidebar')) {
                         var _s = doc.createElement('style');
@@ -817,35 +1050,34 @@ def inject_custom_css():
                         _s.textContent = 'section[data-testid="stSidebar"]{transform:translateX(-100%)!important;transition:none!important;}';
                         doc.head.appendChild(_s);
                     }
-                    // (b) 닫기 버튼 반복 클릭 (Streamlit rerun 대응)
+                    // (b) 닫기 버튼 클릭
                     function _clickClose() {
                         var btn = doc.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
                                   doc.querySelector('[data-testid="stSidebarNavCollapseButton"] button');
-                        if (btn) {
-                            btn.click();
-                            sessionStorage.removeItem('_yt_close_sidebar');
-                            setTimeout(function(){
-                                var el = doc.getElementById('_yt_hide_sidebar');
-                                if (el) el.remove();
-                            }, 400);
-                            return true;
-                        }
+                        if (btn) { btn.click(); _removeSidebarHide(); return true; }
                         return false;
                     }
                     setTimeout(_clickClose, 150);
                     setTimeout(function(){ if(!_clickClose()) setTimeout(_clickClose, 500); }, 600);
-                    // 안전장치: 5초 후 CSS 강제 제거
-                    setTimeout(function(){
-                        sessionStorage.removeItem('_yt_close_sidebar');
-                        var el = doc.getElementById('_yt_hide_sidebar');
-                        if (el) el.remove();
-                    }, 5000);
+                    // 안전장치: 1.5초 후 CSS 강제 제거 (메뉴 재오픈 차단 방지)
+                    setTimeout(_removeSidebarHide, 1500);
                 } else {
-                    sessionStorage.removeItem('_yt_close_sidebar');
-                    var el = doc.getElementById('_yt_hide_sidebar');
-                    if (el) el.remove();
+                    _removeSidebarHide();
                 }
             }
+
+            // 사이드바 열기 버튼 클릭 시 hide CSS 제거 (잔존 차단 방지)
+            function _guardOpenBtn() {
+                var openBtn = doc.querySelector('[data-testid="stSidebarCollapsedControl"] button') ||
+                              doc.querySelector('[data-testid="collapsedControl"] button');
+                if (openBtn && !openBtn._ytGuard) {
+                    openBtn._ytGuard = true;
+                    openBtn.addEventListener('click', _removeSidebarHide);
+                }
+            }
+            setTimeout(_guardOpenBtn, 300);
+            setTimeout(_guardOpenBtn, 1000);
+
             // 사이드바 링크 클릭 시 → CSS 즉시 삽입 + 플래그 설정
             function setupAutoClose() {
                 var sidebar = doc.querySelector('section[data-testid="stSidebar"]');
@@ -855,7 +1087,6 @@ def inject_custom_css():
                     link._ytAutoClose = true;
                     link.addEventListener('click', function() {
                         sessionStorage.setItem('_yt_close_sidebar', Date.now().toString());
-                        // 클릭 즉시 부모 DOM에 CSS 삽입 → 네비게이션 중 사이드바 숨김
                         if (!doc.getElementById('_yt_hide_sidebar')) {
                             var s = doc.createElement('style');
                             s.id = '_yt_hide_sidebar';
@@ -900,6 +1131,9 @@ def _inject_light_overrides():
     section[data-testid="stSidebar"] {
         background: #F6F8FA !important;
         border-right-color: rgba(0,0,0,0.08) !important;
+    }
+    section[data-testid="stSidebar"] > div:first-child {
+        padding-top: 0.5rem !important;
     }
     section[data-testid="stSidebar"] hr { border-color: rgba(0,0,0,0.08) !important; }
     section[data-testid="stSidebar"] label,
@@ -971,6 +1205,32 @@ def _inject_light_overrides():
         color: #656D76 !important;
     }
     .insight-box strong { color: #24292F !important; }
+
+    .freshness-bar {
+        background: #FFFFFF !important;
+        border-color: rgba(0,0,0,0.08) !important;
+        color: #656D76 !important;
+    }
+    .freshness-bar .freshness-time { color: #24292F !important; }
+    .freshness-bar .freshness-hint { color: #9CA3AF !important; }
+
+    .keyword-card {
+        background: #FFFFFF !important;
+        border-color: rgba(0,0,0,0.08) !important;
+    }
+    .keyword-card:hover { border-color: rgba(0,0,0,0.15) !important; box-shadow: 0 8px 24px rgba(0,0,0,0.06) !important; }
+    .keyword-card .kw-name { color: #24292F !important; }
+    .keyword-card .kw-news { color: #9CA3AF !important; }
+    .keyword-card .kw-news span { color: #656D76 !important; }
+
+    .gap-card { background: #FFFFFF !important; border-color: rgba(0,0,0,0.08) !important; }
+    .gap-card .gap-keyword { color: #24292F !important; }
+    .gap-card .gap-meta { color: #9CA3AF !important; }
+    .gap-card .gap-meta strong { color: #24292F !important; }
+    .gap-bar-wrap { background: rgba(0,0,0,0.06) !important; }
+
+    .season-week-label { color: #24292F !important; }
+    .season-tag { background: #F6F8FA !important; border-color: rgba(0,0,0,0.08) !important; color: #656D76 !important; }
 
     .filter-info {
         background: rgba(76,154,255,0.06) !important;
@@ -1060,12 +1320,11 @@ def _inject_light_overrides():
     /* Alerts & Toast */
     .stAlert, .stAlert > div,
     [data-baseweb="notification"], [data-baseweb="notification"] > div {
-        background-color: #FFFFFF !important;
-        color: #24292F !important;
-        border-color: rgba(0,0,0,0.08) !important;
+        background-color: transparent !important;
+        color: #57606A !important;
     }
     .stAlert p, .stAlert span,
-    [data-baseweb="notification"] p, [data-baseweb="notification"] span { color: #24292F !important; }
+    [data-baseweb="notification"] p, [data-baseweb="notification"] span { color: #57606A !important; }
     [data-testid="stToast"], [data-testid="stToast"] > div {
         background-color: #FFFFFF !important;
         border-color: rgba(0,0,0,0.08) !important;
@@ -1132,6 +1391,20 @@ def _inject_light_overrides():
         background-color: #ECEEF0 !important;
         border-color: rgba(0,0,0,0.15) !important;
         color: #24292F !important;
+    }
+    .stApp [data-testid="stButtonGroup"] button[aria-pressed="true"],
+    .stApp [data-testid="stPills"] button[aria-pressed="true"] {
+        background-color: rgba(255,71,87,0.12) !important;
+        color: #E8384F !important;
+        border-color: rgba(255,71,87,0.35) !important;
+        font-weight: 700 !important;
+        box-shadow: 0 0 0 1px rgba(255,71,87,0.35) !important;
+    }
+    .stApp [data-testid="stButtonGroup"] button[aria-pressed="true"] span,
+    .stApp [data-testid="stButtonGroup"] button[aria-pressed="true"] div,
+    .stApp [data-testid="stPills"] button[aria-pressed="true"] span,
+    .stApp [data-testid="stPills"] button[aria-pressed="true"] div {
+        color: #E8384F !important;
     }
 
     /* DataFrame, Metric, Expander */
@@ -1202,7 +1475,8 @@ def render_video_grid_card(video: dict, rank_field: str = "trending_rank") -> No
     channel = html_lib.escape(video.get("channel_title", ""))
     video_id = video.get("video_id", "")
     url = f"https://www.youtube.com/watch?v={html_lib.escape(video_id)}"
-    thumb = video.get("thumbnail_url", "")
+    from src.utils import validate_thumbnail_url
+    thumb = validate_thumbnail_url(video.get("thumbnail_url", ""))
     views = format_count(video.get("view_count", 0))
     subs = format_count(video.get("subscriber_count", 0))
     stars = stars_display(video.get("performance_stars", 1))
@@ -1249,6 +1523,58 @@ def render_empty_state(title: str, description: str) -> None:
 
 def render_insight_box(text: str) -> None:
     st.markdown(f'<div class="insight-box">{text}</div>', unsafe_allow_html=True)
+
+
+def render_freshness_bar(collected_at: str) -> None:
+    """수집 시각 경과에 따른 신선도 바 렌더링."""
+    from datetime import datetime
+    from src.config import KST
+
+    if not collected_at:
+        return
+
+    try:
+        parsed = datetime.fromisoformat(collected_at.replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            # naive datetime → 로컬 서버 시간으로 간주하여 KST 부여
+            parsed = parsed.replace(tzinfo=KST)
+        kst_time = parsed.astimezone(KST)
+    except Exception:
+        return
+
+    now = datetime.now(KST)
+    delta = now - kst_time
+    minutes = int(delta.total_seconds() / 60)
+
+    time_str = kst_time.strftime("%Y-%m-%d %H:%M")
+
+    if minutes < 5:
+        status, label, hint = "fresh", "방금 수집", ""
+    elif minutes < 60:
+        status, label, hint = "fresh", f"{minutes}분 전 수집", ""
+    elif minutes < 240:
+        hours = minutes // 60
+        status = "stale"
+        label = f"{hours}시간 전 수집"
+        hint = "새로고침을 눌러 최신 데이터를 가져오세요"
+    else:
+        hours = minutes // 60
+        status = "old"
+        label = f"{hours}시간 전 수집"
+        hint = "데이터가 오래되었어요. 새로고침을 권장합니다"
+
+    icon = {"fresh": "●", "stale": "●", "old": "●"}[status]
+    hint_html = f'<span class="freshness-hint">{html_lib.escape(hint)}</span>' if hint else ""
+
+    st.markdown(
+        f'<div class="freshness-bar {status}">'
+        f'<span class="freshness-icon">{icon}</span>'
+        f'<span class="freshness-time">{html_lib.escape(label)}</span>'
+        f'<span>{html_lib.escape(time_str)}</span>'
+        f'{hint_html}'
+        f'</div>',
+        unsafe_allow_html=True,
+    )
 
 
 def render_filter_info(count: int, total: int) -> None:
@@ -1328,7 +1654,7 @@ def inject_pills_highlight(selected_labels=None, group_index=0) -> None:
 
         function apply() {{
             var doc = window.parent.document;
-            var groups = doc.querySelectorAll('[data-testid="stButtonGroup"]');
+            var groups = doc.querySelectorAll('[data-testid="stButtonGroup"], [data-testid="stPills"]');
             var g = groups[GI];
             if (!g) return;
             g.querySelectorAll('button').forEach(function(b) {{
@@ -1381,6 +1707,7 @@ def sidebar_with_badges(repo, current_page: str = "dashboard"):
 
         st.page_link("app.py", label="트렌드 대시보드")
         st.page_link("pages/1_search.py", label="키워드 검색")
+        st.page_link("pages/3_ideas.py", label="콘텐츠 아이디어")
         st.page_link("pages/2_settings.py", label="설정")
 
         st.divider()
@@ -1394,6 +1721,13 @@ def sidebar_with_badges(repo, current_page: str = "dashboard"):
             key="theme_light",
             on_change=_sync_theme,
         )
+
+        if st.session_state.get("authenticated"):
+            if st.button("로그아웃", use_container_width=True):
+                st.session_state["authenticated"] = False
+                st.session_state.pop("_token_synced", None)
+                st.query_params["t"] = "_out"
+                st.rerun()
 
         st.divider()
         st.caption("YouTube 트렌드 분석 도구")

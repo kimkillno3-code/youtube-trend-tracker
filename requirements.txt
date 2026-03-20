@@ -9,3 +9,5 @@ streamlit>=1.41.0
 streamlit-autorefresh
 plotly
 openpyxl
+trendspyg>=0.4.0
+pytrends>=4.9.0

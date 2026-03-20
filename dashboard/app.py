@@ -11,7 +11,7 @@ import streamlit as st
 ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.config import YOUTUBE_API_KEY, DB_PATH, DATA_DIR, KST
+from src.config import YOUTUBE_API_KEY, YOUTUBE_DAILY_QUOTA, DB_PATH, DATA_DIR, KST
 from src.collector.youtube_api import YouTubeAPIClient
 from src.collector.trending import collect_trending, save_snapshots
 from src.database.repository import TrendRepository
@@ -21,17 +21,22 @@ from dashboard.theme import (
     render_page_header, render_metric_card,
     render_section_title, render_video_grid,
     render_empty_state, render_insight_box,
-    render_filter_info, build_category_pills, filter_videos_by_category,
+    render_filter_info, render_freshness_bar,
+    build_category_pills, filter_videos_by_category,
     inject_pills_highlight,
 )
 
 st.set_page_config(page_title="YT 토픽 파인더", layout="wide")
+st.markdown('<style>[data-testid="stSidebarNav"]{display:none!important}[data-testid="stSidebar"]>div:first-child{opacity:0!important}</style>', unsafe_allow_html=True)
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 repo = TrendRepository(str(DB_PATH))
 
 inject_custom_css()
 sidebar_with_badges(repo, current_page="dashboard")
+
+from dashboard.auth import require_auth
+require_auth()
 
 try:
     from streamlit_autorefresh import st_autorefresh
@@ -58,6 +63,18 @@ def _handle_api_error(e: Exception, log_id: int, quota: int):
         st.error("수집 중 문제가 발생했어요. 잠시 후 다시 시도해주세요.")
 
 
+def _check_quota_budget(estimated_cost: int = 100) -> bool:
+    """할당량 잔여분 확인. 90% 초과 시 차단."""
+    today_used = repo.get_today_quota_used()
+    if today_used + estimated_cost >= YOUTUBE_DAILY_QUOTA * 0.9:
+        st.error(
+            f"오늘 API 할당량의 {today_used / YOUTUBE_DAILY_QUOTA * 100:.0f}%를 사용했어요. "
+            "나머지는 내일 사용해주세요."
+        )
+        return False
+    return True
+
+
 def do_realtime_collect():
     if not YOUTUBE_API_KEY:
         st.error(
@@ -66,6 +83,8 @@ def do_realtime_collect():
             "2. 프로젝트 루트에 `.env` 파일 생성\n"
             "3. `YOUTUBE_API_KEY=발급받은키` 입력 후 저장"
         )
+        return
+    if not _check_quota_budget(100):
         return
     api = YouTubeAPIClient(YOUTUBE_API_KEY)
     collected_at = datetime.now(KST).isoformat()
@@ -92,6 +111,8 @@ def do_weekly_trend():
             "2. 프로젝트 루트에 `.env` 파일 생성\n"
             "3. `YOUTUBE_API_KEY=발급받은키` 입력 후 저장"
         )
+        return
+    if not _check_quota_budget(200):
         return
     api = YouTubeAPIClient(YOUTUBE_API_KEY)
     collected_at = datetime.now(KST).isoformat()
@@ -211,6 +232,8 @@ with tab_realtime:
     if st.button("실시간 인기 영상 가져오기", type="primary", use_container_width=False):
         do_realtime_collect()
     realtime_videos = repo.get_latest_by_source("realtime", limit=30)
+    if realtime_videos:
+        render_freshness_bar(realtime_videos[0].get("collected_at", ""))
     render_tab_content(realtime_videos, "실시간", "realtime_cat_filter", pills_group=0)
 
 with tab_weekly:
@@ -220,6 +243,8 @@ with tab_weekly:
             do_weekly_trend()
     st.caption("현재 인기 급상승 영상 50개를 조회수 기준으로 정렬하여 TOP 30을 보여줍니다.")
     weekly_videos = repo.get_latest_by_source("weekly", limit=30)
+    if weekly_videos:
+        render_freshness_bar(weekly_videos[0].get("collected_at", ""))
     if weekly_videos and realtime_videos:
         realtime_ids = {v["video_id"] for v in realtime_videos}
         overlap_count = sum(1 for v in weekly_videos if v["video_id"] in realtime_ids)
