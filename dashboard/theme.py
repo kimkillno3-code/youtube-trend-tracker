@@ -693,6 +693,15 @@ def inject_custom_css():
         .page-header h1 { font-size: 1.25rem; }
         .metric-card .metric-value { font-size: 1.25rem; }
         .vgrid .vg-body { padding: 12px 14px; }
+        /* 모바일: 사이드바 토글 버튼 보이도록 헤더 복원 */
+        header[data-testid="stHeader"] {
+            height: auto !important; min-height: auto !important;
+            overflow: visible !important;
+            background: #0D1117 !important;
+        }
+        [data-testid="stSidebarCollapsedControl"] {
+            display: flex !important;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
