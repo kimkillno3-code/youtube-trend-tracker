@@ -1056,38 +1056,31 @@ def inject_custom_css():
             _sjs.id = '_yt_sidebar_js';
             _sjs.textContent = '(' + function() {
                 var d = document, w = window;
-                var HIDE = 'section[data-testid="stSidebar"]{transform:translateX(-100%)!important;transition:none!important;}';
-                function addHide() {
+                var HIDE_CSS = 'section[data-testid="stSidebar"]{transform:translateX(-100%)!important;transition:none!important;}';
+                var CTRL_CSS = '[data-testid="stSidebarCollapsedControl"],[data-testid="collapsedControl"]{display:flex!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;}';
+                function lockSidebar() {
                     if (!d.getElementById('_yt_hsb')) {
                         var s = d.createElement('style'); s.id = '_yt_hsb';
-                        s.textContent = HIDE; d.head.appendChild(s);
+                        s.textContent = HIDE_CSS + CTRL_CSS;
+                        d.head.appendChild(s);
                     }
                 }
-                function removeHide() {
+                function unlockSidebar() {
                     sessionStorage.removeItem('_yt_csb');
                     var e = d.getElementById('_yt_hsb'); if (e) e.remove();
-                }
-                function tryClose() {
-                    var btn = d.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
-                              d.querySelector('[data-testid="stSidebarNavCollapseButton"] button');
-                    if (btn) btn.click();
-                }
-                // collapsed control이 보이면 = Streamlit이 실제로 닫은 것
-                function isCollapsed() {
-                    var ctrl = d.querySelector('[data-testid="stSidebarCollapsedControl"]') ||
-                               d.querySelector('[data-testid="collapsedControl"]');
-                    return ctrl && w.getComputedStyle(ctrl).display !== 'none';
                 }
                 // 클릭 이벤트 위임 (capture phase)
                 d.addEventListener('click', function(e) {
                     if (w.innerWidth > 768) return;
+                    // 사이드바 링크 클릭 → 잠금
                     if (e.target.closest('section[data-testid="stSidebar"] .stPageLink a')) {
                         sessionStorage.setItem('_yt_csb', Date.now().toString());
-                        addHide();
+                        lockSidebar();
                     }
+                    // 햄버거 클릭 → 잠금 해제
                     if (e.target.closest('[data-testid="stSidebarCollapsedControl"]') ||
                         e.target.closest('[data-testid="collapsedControl"]')) {
-                        removeHide();
+                        unlockSidebar();
                     }
                 }, true);
                 // 페이지 로드 시 플래그 확인
@@ -1096,18 +1089,16 @@ def inject_custom_css():
                     if (!f) return;
                     var elapsed = Date.now() - (parseInt(f) || 0);
                     sessionStorage.removeItem('_yt_csb');
-                    if (elapsed > 5000) { removeHide(); return; }
-                    addHide();
-                    // 닫기 시도 (fire-and-forget, CSS 제거 안 함)
-                    setTimeout(tryClose, 200);
-                    setTimeout(tryClose, 600);
-                    setTimeout(tryClose, 1200);
-                    // collapsed control 감시 → 보이면 Streamlit이 닫은 것 → CSS 제거
-                    var obs = new MutationObserver(function() {
-                        if (isCollapsed()) { obs.disconnect(); removeHide(); }
-                    });
-                    obs.observe(d.body, {childList:true, subtree:true, attributes:true, attributeFilter:['style','class']});
-                    setTimeout(function() { obs.disconnect(); }, 6000);
+                    if (elapsed > 5000) { unlockSidebar(); return; }
+                    lockSidebar();
+                    // tryClose는 best-effort (Streamlit 상태 동기화)
+                    function tryClose() {
+                        var btn = d.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
+                                  d.querySelector('[data-testid="stSidebarNavCollapseButton"] button');
+                        if (btn) btn.click();
+                    }
+                    setTimeout(tryClose, 300);
+                    setTimeout(tryClose, 800);
                 });
             } + ')();';
             doc.head.appendChild(_sjs);
