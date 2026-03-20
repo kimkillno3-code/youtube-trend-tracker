@@ -55,6 +55,24 @@ def inject_custom_css():
         background: transparent !important;
         border-bottom: none !important;
     }
+    /* 사이드바 토글 버튼: ">>" → 햄버거 아이콘 */
+    [data-testid="stSidebarCollapsedControl"] button {
+        background: rgba(255,255,255,0.06) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 8px !important;
+        width: 36px !important; height: 36px !important;
+        display: flex !important; align-items: center !important;
+        justify-content: center !important;
+    }
+    [data-testid="stSidebarCollapsedControl"] button svg {
+        display: none !important;
+    }
+    [data-testid="stSidebarCollapsedControl"] button::after {
+        content: '\\2630';
+        font-size: 1.2rem;
+        color: #E6EDF3;
+        line-height: 1;
+    }
     /* Streamlit 상단 컬러바 / 런닝 인디케이터 */
     .stApp > div:first-child > div:first-child,
     .stApp::before,
@@ -697,6 +715,15 @@ def _inject_light_overrides():
         background-color: #FAFBFC !important;
         color: #24292F !important;
     }
+    /* 사이드바 토글 버튼 — 라이트 모드 */
+    [data-testid="stSidebarCollapsedControl"] button {
+        background: rgba(0,0,0,0.04) !important;
+        border-color: rgba(0,0,0,0.12) !important;
+    }
+    [data-testid="stSidebarCollapsedControl"] button::after {
+        color: #24292F !important;
+    }
+
     /* 사이드바 라이트 모드 */
     section[data-testid="stSidebar"] {
         background: #F6F8FA !important;
