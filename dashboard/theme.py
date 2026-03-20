@@ -55,10 +55,14 @@ def inject_custom_css():
     header[data-testid="stHeader"] {
         background: transparent !important;
         border-bottom: none !important;
-        height: 50px !important;
-        min-height: 50px !important;
-        max-height: 50px !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        overflow: visible !important;
         pointer-events: none !important;
+    }
+    header[data-testid="stHeader"] button {
+        pointer-events: auto !important;
     }
     .stApp [data-testid="stAppViewContainer"] > .stMainBlockContainer,
     .stApp .block-container {

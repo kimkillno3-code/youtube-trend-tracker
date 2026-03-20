@@ -40,22 +40,19 @@ body {
   line-height: 1.7;
 }
 
-/* ── 스크롤바 ── */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 3px; }
 
-/* ── 레이아웃 ── */
 .container {
   max-width: 800px;
   margin: 0 auto;
   padding: 0 24px 80px;
 }
 
-/* ── 히어로 ── */
 .hero {
   text-align: center;
-  padding: 64px 24px 48px;
+  padding: 48px 24px 36px;
   position: relative;
 }
 .hero::after {
@@ -65,77 +62,26 @@ body {
   width: 200px; height: 1px;
   background: linear-gradient(90deg, transparent, var(--border2), transparent);
 }
-.hero-badge {
-  display: inline-block;
-  background: rgba(255,71,87,0.12);
-  color: var(--accent2);
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 4px 14px;
-  border-radius: 20px;
-  margin-bottom: 16px;
-  letter-spacing: 0.03em;
-}
 .hero h1 {
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 800;
   letter-spacing: -0.03em;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   background: linear-gradient(135deg, #F0F2F5, #C9D1D9);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 .hero p {
   color: var(--text2);
-  font-size: 0.95rem;
-  max-width: 480px;
-  margin: 0 auto;
+  font-size: 0.9rem;
 }
 
-/* ── 빠른 시작 카드 ── */
-.quick-start {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-  margin: 32px 0 48px;
-}
-.qs-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 20px;
-  text-decoration: none;
-  color: inherit;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-}
-.qs-card:hover {
-  border-color: var(--border2);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-}
-.qs-icon {
-  font-size: 1.5rem;
-  margin-bottom: 10px;
-}
-.qs-card h3 {
-  font-size: 0.88rem;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-.qs-card p {
-  font-size: 0.75rem;
-  color: var(--text3);
-  line-height: 1.5;
-}
-
-/* ── 네비게이션 ── */
 .toc {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 20px 24px;
-  margin-bottom: 40px;
+  margin: 32px 0 40px;
 }
 .toc-title {
   font-size: 0.72rem;
@@ -166,10 +112,7 @@ body {
   color: var(--text);
 }
 
-/* ── 섹션 ── */
-.section {
-  margin-bottom: 48px;
-}
+.section { margin-bottom: 48px; }
 .section-header {
   display: flex;
   align-items: center;
@@ -194,7 +137,6 @@ body {
   letter-spacing: -0.02em;
 }
 
-/* ── 콘텐츠 블록 ── */
 .block {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -213,14 +155,9 @@ body {
   color: var(--text2);
   line-height: 1.8;
 }
-.block ul, .block ol {
-  padding-left: 20px;
-}
-.block li {
-  margin-bottom: 4px;
-}
+.block ul, .block ol { padding-left: 20px; }
+.block li { margin-bottom: 4px; }
 
-/* ── 스텝 리스트 ── */
 .steps {
   list-style: none;
   padding: 0;
@@ -245,24 +182,6 @@ body {
   display: flex; align-items: center; justify-content: center;
 }
 
-/* ── 코드 블록 ── */
-.code {
-  background: #0D1117;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 18px;
-  font-family: 'SF Mono', 'Fira Code', monospace;
-  font-size: 0.82rem;
-  color: var(--green);
-  overflow-x: auto;
-  margin: 10px 0;
-}
-
-/* ── 테이블 ── */
-.table-wrap {
-  overflow-x: auto;
-  margin: 10px 0;
-}
 table {
   width: 100%;
   border-collapse: collapse;
@@ -283,11 +202,7 @@ td {
   color: var(--text2);
   border-bottom: 1px solid var(--border);
 }
-tr:hover td {
-  background: rgba(255,255,255,0.02);
-}
 
-/* ── 하이라이트 박스 ── */
 .tip {
   background: rgba(76,154,255,0.06);
   border: 1px solid rgba(76,154,255,0.12);
@@ -326,56 +241,22 @@ tr:hover td {
   margin: 8px 0;
 }
 
-/* ── 별점 테이블 ── */
-.star-row td:first-child {
-  color: var(--amber);
-  font-size: 0.9rem;
-  letter-spacing: 1px;
-}
-
-/* ── 태그 ── */
-.tag {
-  display: inline-block;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 2px 8px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--text2);
-}
 .tag.free {
   background: rgba(54,211,153,0.1);
   border-color: rgba(54,211,153,0.15);
   color: var(--green);
 }
 
-/* ── 뒤로가기 버튼 ── */
-.back-btn {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: #fff;
-  text-decoration: none;
-  font-size: 0.82rem;
-  font-weight: 700;
-  padding: 12px 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(255,71,87,0.3);
-  transition: all 0.2s ease;
-  z-index: 100;
-}
-.back-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255,71,87,0.4);
+.star-row td:first-child {
+  color: var(--amber);
+  font-size: 0.9rem;
+  letter-spacing: 1px;
 }
 
-/* ── 맨 위로 ── */
 .top-btn {
   position: fixed;
   bottom: 24px;
-  right: 160px;
+  right: 24px;
   background: var(--surface);
   border: 1px solid var(--border2);
   color: var(--text2);
@@ -392,18 +273,13 @@ tr:hover td {
   color: var(--text);
 }
 
-/* ── 모바일 ── */
 @media (max-width: 640px) {
-  .hero { padding: 40px 16px 32px; }
-  .hero h1 { font-size: 1.5rem; }
+  .hero { padding: 32px 16px 24px; }
+  .hero h1 { font-size: 1.4rem; }
   .container { padding: 0 16px 80px; }
   .toc-list { grid-template-columns: 1fr; }
-  .quick-start { grid-template-columns: 1fr; }
-  .back-btn { bottom: 16px; right: 16px; padding: 10px 16px; font-size: 0.78rem; }
-  .top-btn { bottom: 16px; right: 130px; padding: 10px 14px; font-size: 0.78rem; }
 }
 
-/* ── 페이드인 애니메이션 ── */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
@@ -414,121 +290,29 @@ tr:hover td {
 <body>
 <div id="top"></div>
 
-<!-- ── 히어로 ── -->
 <div class="hero">
-  <span class="hero-badge">GUIDE v1.0</span>
-  <h1>YT 토픽 파인더</h1>
-  <p>YouTube 트렌드를 한눈에 파악하고, 내 콘텐츠에 딱 맞는 기회를 찾아보세요</p>
+  <h1>YT 토픽 파인더 사용 가이드</h1>
+  <p>메뉴별 기능과 활용법을 확인하세요</p>
 </div>
 
 <div class="container">
 
-<!-- ── 빠른 시작 ── -->
-<div class="quick-start">
-  <a class="qs-card" href="#start">
-    <div class="qs-icon">🚀</div>
-    <h3>처음이에요</h3>
-    <p>API 키 발급부터 첫 실행까지</p>
-  </a>
-  <a class="qs-card" href="#trend">
-    <div class="qs-icon">📊</div>
-    <h3>트렌드 보기</h3>
-    <p>지금 뜨는 영상이 궁금해요</p>
-  </a>
-  <a class="qs-card" href="#search">
-    <div class="qs-icon">🔍</div>
-    <h3>경쟁 분석</h3>
-    <p>내 키워드의 경쟁 상황을 알고 싶어요</p>
-  </a>
-  <a class="qs-card" href="#ideas">
-    <div class="qs-icon">💡</div>
-    <h3>아이디어 찾기</h3>
-    <p>어떤 주제가 블루오션인지 알고 싶어요</p>
-  </a>
-</div>
-
-<!-- ── 목차 ── -->
 <div class="toc">
   <div class="toc-title">목차</div>
   <ul class="toc-list">
-    <li><a href="#start">1. 시작하기</a></li>
-    <li><a href="#layout">2. 화면 구성</a></li>
-    <li><a href="#trend">3. 트렌드 대시보드</a></li>
-    <li><a href="#search">4. 키워드 검색</a></li>
-    <li><a href="#ideas">5. 콘텐츠 아이디어</a></li>
-    <li><a href="#settings">6. 설정</a></li>
-    <li><a href="#stars">7. 성과 별점</a></li>
-    <li><a href="#quota">8. API 할당량 관리</a></li>
-    <li><a href="#errors">9. 문제 해결</a></li>
-    <li><a href="#data">10. 데이터 저장</a></li>
+    <li><a href="#trend">1. 트렌드 대시보드</a></li>
+    <li><a href="#search">2. 키워드 검색</a></li>
+    <li><a href="#ideas">3. 콘텐츠 아이디어</a></li>
+    <li><a href="#settings">4. 설정</a></li>
+    <li><a href="#stars">5. 성과 별점</a></li>
+    <li><a href="#quota">6. API 할당량 관리</a></li>
   </ul>
 </div>
 
-<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     1. 시작하기
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-<div class="section" id="start">
-  <div class="section-header">
-    <span class="section-num">1</span>
-    <h2>시작하기</h2>
-  </div>
-
-  <div class="block">
-    <h3>준비물</h3>
-    <div class="table-wrap">
-      <table>
-        <tr><th>항목</th><th>설명</th></tr>
-        <tr><td><strong>Python</strong></td><td>3.9 이상</td></tr>
-        <tr><td><strong>YouTube API 키</strong></td><td><a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:var(--blue)">Google Cloud Console</a>에서 발급</td></tr>
-        <tr><td><strong>YouTube Data API v3</strong></td><td>Google Cloud Console → API 및 서비스 → 라이브러리에서 활성화</td></tr>
-      </table>
-    </div>
-  </div>
-
-  <div class="block">
-    <h3>API 키 등록하기</h3>
-    <p>프로젝트 폴더에 <code>.env</code> 파일을 만들고 아래처럼 입력하세요.</p>
-    <div class="code">YOUTUBE_API_KEY=발급받은_API_키</div>
-    <div class="tip"><strong>확인 방법</strong> — 설정 페이지에서 API 키가 등록됐는지 바로 확인할 수 있어요 (마스킹 처리돼서 안전해요)</div>
-  </div>
-
-  <div class="block">
-    <h3>실행하기</h3>
-    <div class="code">pip install -r requirements.txt<br>streamlit run dashboard/app.py</div>
-    <p>브라우저에서 <code>http://localhost:8501</code>로 접속하면 바로 쓸 수 있어요.</p>
-  </div>
-</div>
-
-<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     2. 화면 구성
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-<div class="section" id="layout">
-  <div class="section-header">
-    <span class="section-num">2</span>
-    <h2>화면 구성</h2>
-  </div>
-
-  <div class="block">
-    <h3>사이드바 메뉴</h3>
-    <div class="table-wrap">
-      <table>
-        <tr><th>메뉴</th><th>한 줄 설명</th></tr>
-        <tr><td><strong>트렌드 대시보드</strong></td><td>지금 뜨는 영상을 실시간으로 확인</td></tr>
-        <tr><td><strong>키워드 검색</strong></td><td>내 키워드로 경쟁 영상을 검색하고 분석</td></tr>
-        <tr><td><strong>콘텐츠 아이디어</strong></td><td>급상승 키워드, 블루오션 주제 발견</td></tr>
-        <tr><td><strong>설정</strong></td><td>API 키 상태, 할당량, 수집 기록 확인</td></tr>
-        <tr><td><strong>라이트 모드</strong></td><td>다크 ↔ 라이트 테마 전환</td></tr>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     3. 트렌드 대시보드
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- 1. 트렌드 대시보드 -->
 <div class="section" id="trend">
   <div class="section-header">
-    <span class="section-num">3</span>
+    <span class="section-num">1</span>
     <h2>트렌드 대시보드</h2>
   </div>
 
@@ -568,12 +352,10 @@ tr:hover td {
   </div>
 </div>
 
-<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     4. 키워드 검색
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- 2. 키워드 검색 -->
 <div class="section" id="search">
   <div class="section-header">
-    <span class="section-num">4</span>
+    <span class="section-num">2</span>
     <h2>키워드 검색</h2>
   </div>
 
@@ -597,16 +379,14 @@ tr:hover td {
       <li><strong>엑셀 다운로드</strong> / <strong>썸네일 모아받기</strong></li>
     </ul>
     <span class="cost">API ~102 유닛 · 하루 약 98회 검색 가능</span>
-    <div class="warn"><strong>참고</strong> — 키워드 검색은 <code>search.list</code> API를 사용해서 1회당 100유닛이 필요해요. 가장 비용이 높은 기능이니 신중하게 사용하세요.</div>
+    <div class="warn"><strong>참고</strong> — 키워드 검색은 1회당 100유닛이 필요해요. 가장 비용이 높은 기능이니 신중하게 사용하세요.</div>
   </div>
 </div>
 
-<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     5. 콘텐츠 아이디어
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- 3. 콘텐츠 아이디어 -->
 <div class="section" id="ideas">
   <div class="section-header">
-    <span class="section-num">5</span>
+    <span class="section-num">3</span>
     <h2>콘텐츠 아이디어</h2>
   </div>
 
@@ -628,38 +408,34 @@ tr:hover td {
   </div>
 </div>
 
-<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     6. 설정
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- 4. 설정 -->
 <div class="section" id="settings">
   <div class="section-header">
-    <span class="section-num">6</span>
+    <span class="section-num">4</span>
     <h2>설정</h2>
   </div>
 
   <div class="block">
     <ul>
-      <li><strong>API 키 상태</strong> — 등록된 키를 마스킹해서 안전하게 표시 (앞 4자리 + *** + 뒤 4자리)</li>
+      <li><strong>API 키 상태</strong> — 등록된 키를 마스킹해서 안전하게 표시</li>
       <li><strong>일일 할당량</strong> — 오늘 사용량, 잔여량, 사용률을 프로그레스 바로 확인</li>
-      <li><strong>최근 수집 기록</strong> — 최근 10건의 수집 이력 (유형, 시간, 영상 수, 사용량, 상태)</li>
+      <li><strong>최근 수집 기록</strong> — 최근 10건의 수집 이력 확인</li>
     </ul>
-    <div class="tip"><strong>할당량 초기화</strong> — 매일 태평양 시간 자정(한국 시간 오후 4~5시)에 자동으로 리셋돼요.</div>
+    <div class="tip"><strong>할당량 초기화</strong> — 매일 한국 시간 오후 4~5시에 자동으로 리셋돼요.</div>
   </div>
 </div>
 
-<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     7. 성과 별점
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- 5. 성과 별점 -->
 <div class="section" id="stars">
   <div class="section-header">
-    <span class="section-num">7</span>
+    <span class="section-num">5</span>
     <h2>성과 별점</h2>
   </div>
 
   <div class="block">
     <p>영상 카드의 별점은 <strong>구독자 대비 조회수 비율</strong>로 매겨요.</p>
-    <div class="table-wrap">
-      <table class="star-table">
+    <div style="overflow-x:auto;margin:10px 0">
+      <table>
         <tr><th>별점</th><th>조회수 / 구독자</th><th>의미</th></tr>
         <tr class="star-row"><td>★★★★★</td><td>50배 이상</td><td>초대박</td></tr>
         <tr class="star-row"><td>★★★★</td><td>10배 이상</td><td>대박</td></tr>
@@ -672,18 +448,16 @@ tr:hover td {
   </div>
 </div>
 
-<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     8. API 할당량 관리
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<!-- 6. API 할당량 관리 -->
 <div class="section" id="quota">
   <div class="section-header">
-    <span class="section-num">8</span>
+    <span class="section-num">6</span>
     <h2>API 할당량 관리</h2>
   </div>
 
   <div class="block">
     <h3>기능별 API 비용</h3>
-    <div class="table-wrap">
+    <div style="overflow-x:auto;margin:10px 0">
       <table>
         <tr><th>기능</th><th>유닛</th><th>하루 가능 횟수</th></tr>
         <tr><td>실시간 인기 영상 가져오기</td><td>~2</td><td>~5,000회</td></tr>
@@ -700,84 +474,17 @@ tr:hover td {
       <li>분석 리포트 (차트, 인사이트)</li>
       <li>카테고리 필터링 · 정렬 변경</li>
       <li>엑셀 다운로드 · 썸네일 모아받기</li>
-      <li>콘텐츠 아이디어 (급상승 키워드, 갭 분석, 시즌 캘린더)</li>
-      <li>설정 페이지 전체 · 라이트/다크 모드 전환</li>
+      <li>콘텐츠 아이디어 전체</li>
+      <li>설정 페이지 · 라이트/다크 모드 전환</li>
     </ul>
   </div>
-
-  <div class="block">
-    <h3>할당량 아끼는 법</h3>
-    <ol class="steps">
-      <li><strong>검색은 신중하게</strong> — 1회에 ~102유닛이에요. 하루 98회까지 가능</li>
-      <li><strong>트렌드 수집은 부담 없이</strong> — 1회에 ~2유닛으로 아주 저렴해요</li>
-      <li><strong>분석 리포트 적극 활용</strong> — 한 번 수집한 데이터는 무제한 분석 가능</li>
-      <li><strong>설정에서 사용량 확인</strong> — 70% 이상이면 안내 메시지가 떠요</li>
-    </ol>
-  </div>
 </div>
 
-<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     9. 문제 해결
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-<div class="section" id="errors">
-  <div class="section-header">
-    <span class="section-num">9</span>
-    <h2>문제 해결</h2>
-  </div>
-
-  <div class="block">
-    <div class="table-wrap">
-      <table>
-        <tr><th>이런 메시지가 보이면</th><th>이렇게 해결하세요</th></tr>
-        <tr>
-          <td><strong>API 키가 설정되지 않았어요</strong></td>
-          <td>프로젝트 루트에 <code>.env</code> 파일을 만들고 <code>YOUTUBE_API_KEY=키값</code> 입력</td>
-        </tr>
-        <tr>
-          <td><strong>일일 할당량을 초과했어요</strong></td>
-          <td>한국 시간 오후 4~5시 이후 자동으로 초기화돼요. 그때까지 분석 리포트를 활용하세요</td>
-        </tr>
-        <tr>
-          <td><strong>API 키 권한이 부족해요</strong></td>
-          <td>Google Cloud Console에서 YouTube Data API v3이 활성화됐는지 확인</td>
-        </tr>
-        <tr>
-          <td><strong>네트워크 연결을 확인해주세요</strong></td>
-          <td>인터넷 연결 상태를 확인한 뒤 다시 시도</td>
-        </tr>
-      </table>
-    </div>
-  </div>
 </div>
-
-<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-     10. 데이터 저장
-     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
-<div class="section" id="data">
-  <div class="section-header">
-    <span class="section-num">10</span>
-    <h2>데이터 저장</h2>
-  </div>
-
-  <div class="block">
-    <div class="table-wrap">
-      <table>
-        <tr><th>항목</th><th>위치</th></tr>
-        <tr><td><strong>데이터베이스</strong></td><td><code>data/youtube_trends.db</code> (SQLite)</td></tr>
-        <tr><td><strong>환경 설정</strong></td><td><code>.env</code> (프로젝트 루트)</td></tr>
-        <tr><td><strong>테마 설정</strong></td><td><code>.streamlit/config.toml</code></td></tr>
-      </table>
-    </div>
-    <div class="tip"><strong>안심하세요</strong> — 모든 데이터는 내 컴퓨터(로컬 SQLite)에만 저장돼요. 외부 서버로 전송되는 건 없어요.</div>
-  </div>
-</div>
-
-</div><!-- /container -->
 
 <a href="#top" class="top-btn">↑ 맨 위로</a>
 
 <script>
-// 스크롤에 따라 맨 위로 버튼 표시
 const topBtn = document.querySelector('.top-btn');
 window.addEventListener('scroll', () => {
   topBtn.style.opacity = window.scrollY > 300 ? '1' : '0';
