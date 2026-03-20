@@ -15,7 +15,7 @@ from dashboard.theme import (
 )
 
 st.set_page_config(page_title="설정 - YT", layout="wide")
-st.markdown('<style>[data-testid="stSidebarNav"]{display:none!important}[data-testid="stSidebar"]>div:first-child{opacity:0!important}</style>', unsafe_allow_html=True)
+st.markdown('<style>[data-testid="stSidebarNav"]{display:none!important}</style>', unsafe_allow_html=True)
 
 repo = TrendRepository(str(DB_PATH))
 inject_custom_css()
