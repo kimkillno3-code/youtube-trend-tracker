@@ -1070,24 +1070,27 @@ def inject_custom_css():
                 function tryClose() {
                     var btn = d.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
                               d.querySelector('[data-testid="stSidebarNavCollapseButton"] button');
-                    if (btn) { btn.click(); return true; }
-                    return false;
+                    if (btn) btn.click();
+                }
+                // collapsed control이 보이면 = Streamlit이 실제로 닫은 것
+                function isCollapsed() {
+                    var ctrl = d.querySelector('[data-testid="stSidebarCollapsedControl"]') ||
+                               d.querySelector('[data-testid="collapsedControl"]');
+                    return ctrl && w.getComputedStyle(ctrl).display !== 'none';
                 }
                 // 클릭 이벤트 위임 (capture phase)
                 d.addEventListener('click', function(e) {
                     if (w.innerWidth > 768) return;
-                    // 사이드바 링크 클릭 → 플래그 + 숨김
                     if (e.target.closest('section[data-testid="stSidebar"] .stPageLink a')) {
                         sessionStorage.setItem('_yt_csb', Date.now().toString());
                         addHide();
                     }
-                    // 열기 버튼 클릭 → 숨김 해제
                     if (e.target.closest('[data-testid="stSidebarCollapsedControl"]') ||
                         e.target.closest('[data-testid="collapsedControl"]')) {
                         removeHide();
                     }
                 }, true);
-                // 페이지 로드 시 플래그 확인 이벤트
+                // 페이지 로드 시 플래그 확인
                 w.addEventListener('_yt_chk_sb', function() {
                     var f = sessionStorage.getItem('_yt_csb');
                     if (!f) return;
@@ -1095,14 +1098,16 @@ def inject_custom_css():
                     sessionStorage.removeItem('_yt_csb');
                     if (elapsed > 5000) { removeHide(); return; }
                     addHide();
-                    function attempt() {
-                        if (tryClose()) { setTimeout(removeHide, 300); }
-                    }
-                    setTimeout(attempt, 200);
-                    setTimeout(attempt, 600);
-                    setTimeout(attempt, 1200);
-                    // 안전장치: 2.5초 후에도 닫기 실패 시 CSS만 유지 (열기 버튼으로 해제)
-                    setTimeout(function() { if (!tryClose()) { /* CSS 유지 */ } else { setTimeout(removeHide, 300); } }, 2500);
+                    // 닫기 시도 (fire-and-forget, CSS 제거 안 함)
+                    setTimeout(tryClose, 200);
+                    setTimeout(tryClose, 600);
+                    setTimeout(tryClose, 1200);
+                    // collapsed control 감시 → 보이면 Streamlit이 닫은 것 → CSS 제거
+                    var obs = new MutationObserver(function() {
+                        if (isCollapsed()) { obs.disconnect(); removeHide(); }
+                    });
+                    obs.observe(d.body, {childList:true, subtree:true, attributes:true, attributeFilter:['style','class']});
+                    setTimeout(function() { obs.disconnect(); }, 6000);
                 });
             } + ')();';
             doc.head.appendChild(_sjs);
