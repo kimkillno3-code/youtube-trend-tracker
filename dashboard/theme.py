@@ -109,69 +109,28 @@ def inject_custom_css():
     /* ═══════════════════════════════════
        GNB (상단 네비게이션)
        ═══════════════════════════════════ */
-    .gnb-bar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px 24px;
-        background: #0B0E14;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
-        position: sticky;
-        top: 0;
-        z-index: 999;
+    /* GNB 영역 여백 제거 */
+    .gnb-wrap { margin: -1rem -1rem 0.5rem -1rem; }
+    .gnb-wrap .stPageLink,
+    .gnb-wrap [data-testid="stPageLink"] { display: inline-block !important; }
+    .gnb-wrap .stPageLink a,
+    .gnb-wrap [data-testid="stPageLink"] a {
+        font-size: 0.85rem !important;
+        padding: 6px 14px !important;
+        border-radius: 6px !important;
+        color: #8B949E !important;
+        font-weight: 500 !important;
     }
-    .gnb-left {
-        display: flex;
-        align-items: center;
-        gap: 28px;
+    .gnb-wrap .stPageLink a:hover,
+    .gnb-wrap [data-testid="stPageLink"] a:hover {
+        color: #E6EDF3 !important;
+        background: rgba(255,255,255,0.06) !important;
     }
-    .gnb-logo {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        text-decoration: none;
-    }
-    .gnb-logo .yt { font-weight: 900; font-size: 1.1rem; color: #FF4757; }
-    .gnb-logo .name { font-weight: 700; font-size: 0.9rem; color: #F0F2F5; }
-    .gnb-nav {
-        display: flex;
-        gap: 4px;
-    }
-    .gnb-nav a {
-        color: #8B949E;
-        text-decoration: none;
-        font-size: 0.85rem;
-        font-weight: 500;
-        padding: 6px 14px;
-        border-radius: 6px;
-        transition: all 0.15s;
-    }
-    .gnb-nav a:hover { color: #E6EDF3; background: rgba(255,255,255,0.06); }
-    .gnb-nav a.active { color: #FFFFFF; background: #1A1F2B; }
-    .gnb-right {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-    .gnb-right .gnb-info {
-        font-size: 0.72rem;
-        color: #6E7681;
-    }
-    .gnb-toggle {
-        cursor: pointer;
-        background: none;
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 6px;
-        padding: 4px 10px;
-        font-size: 0.75rem;
-        color: #8B949E;
-        transition: all 0.15s;
-    }
-    .gnb-toggle:hover { border-color: rgba(255,255,255,0.2); color: #E6EDF3; }
-    @media (max-width: 768px) {
-        .gnb-bar { padding: 8px 12px; }
-        .gnb-nav a { font-size: 0.78rem; padding: 5px 10px; }
-        .gnb-right .gnb-info { display: none; }
+    .gnb-wrap .stPageLink a[aria-current="page"],
+    .gnb-wrap [data-testid="stPageLink"] a[aria-current="page"] {
+        color: #FFFFFF !important;
+        background: #1A1F2B !important;
+        font-weight: 600 !important;
     }
 
     /* ═══════════════════════════════════
@@ -736,14 +695,20 @@ def _inject_light_overrides():
         color: #24292F !important;
     }
     /* GNB 라이트 모드 */
-    .gnb-bar { background: #F6F8FA !important; border-bottom-color: rgba(0,0,0,0.08) !important; }
-    .gnb-logo .name { color: #24292F !important; }
-    .gnb-nav a { color: #656D76 !important; }
-    .gnb-nav a:hover { color: #24292F !important; background: rgba(0,0,0,0.04) !important; }
-    .gnb-nav a.active { color: #24292F !important; background: #ECEEF0 !important; }
-    .gnb-right .gnb-info { color: #8B949E !important; }
-    .gnb-toggle { color: #656D76 !important; border-color: rgba(0,0,0,0.12) !important; }
-    .gnb-toggle:hover { color: #24292F !important; }
+    .gnb-wrap .stPageLink a,
+    .gnb-wrap [data-testid="stPageLink"] a {
+        color: #656D76 !important;
+    }
+    .gnb-wrap .stPageLink a:hover,
+    .gnb-wrap [data-testid="stPageLink"] a:hover {
+        color: #24292F !important;
+        background: rgba(0,0,0,0.04) !important;
+    }
+    .gnb-wrap .stPageLink a[aria-current="page"],
+    .gnb-wrap [data-testid="stPageLink"] a[aria-current="page"] {
+        color: #24292F !important;
+        background: #ECEEF0 !important;
+    }
 
     .page-header {
         background: linear-gradient(135deg, #F6F8FA 0%, #ECEEF0 50%, #F0EEF5 100%) !important;
@@ -1193,62 +1158,40 @@ def inject_pills_highlight(selected_labels=None, group_index=0) -> None:
 
 def sidebar_with_badges(repo, current_page: str = "dashboard"):
     """GNB 상단 네비게이션 바 렌더링 (사이드바 대체)."""
-    from datetime import timezone, timedelta
-
     if "_theme_pref" not in st.session_state:
         st.session_state["_theme_pref"] = False
 
-    # 마지막 수집 시간 (KST 변환)
-    last_raw = repo.get_last_collection_time()
-    last_kst = ""
-    if last_raw:
-        try:
-            from datetime import datetime as _dt
-            utc_dt = _dt.fromisoformat(last_raw.replace("Z", "+00:00"))
-            kst_dt = utc_dt.astimezone(timezone(timedelta(hours=9)))
-            last_kst = kst_dt.strftime("%m/%d %H:%M")
-        except Exception:
-            last_kst = last_raw[:16].replace("T", " ")
-
     is_light = st.session_state["_theme_pref"]
-    info_text = f"마지막 수집: {last_kst}" if last_kst else ""
-
     logo_name_color = "#24292F" if is_light else "#F0F2F5"
-    info_color = "#8B949E" if is_light else "#6E7681"
     bar_bg = "#F6F8FA" if is_light else "#0B0E14"
     bar_border = "rgba(0,0,0,0.08)" if is_light else "rgba(255,255,255,0.06)"
 
-    # GNB 로고 + 수집 시간
-    st.markdown(f"""
-    <div style="display:flex;align-items:center;justify-content:space-between;
-                padding:10px 24px;background:{bar_bg};
-                border-bottom:1px solid {bar_border};margin:-1rem -1rem 0 -1rem;">
-        <div style="display:flex;align-items:center;gap:6px;">
+    # GNB: 로고 + 페이지 링크 + 테마 토글을 한 줄에
+    gnb = st.container()
+    with gnb:
+        st.markdown(f"""
+        <div style="display:flex;align-items:center;gap:16px;
+                    padding:8px 0 6px;border-bottom:1px solid {bar_border};">
             <span style="font-weight:900;font-size:1.1rem;color:#FF4757;">YT</span>
-            <span style="font-weight:700;font-size:0.9rem;color:{logo_name_color};">토픽 파인더</span>
+            <span style="font-weight:700;font-size:0.9rem;color:{logo_name_color};margin-right:8px;">토픽 파인더</span>
         </div>
-        <span style="font-size:0.72rem;color:{info_color};">{info_text}</span>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-    # 네비게이션 (st.page_link) + 테마 토글
-    nav_cols = st.columns([1.2, 1, 0.7, 3, 1])
-    pages = [
-        ("dashboard", "app.py", "트렌드 대시보드"),
-        ("search", "pages/1_search.py", "키워드 검색"),
-        ("settings", "pages/2_settings.py", "설정"),
-    ]
-    for i, (page_id, href, label) in enumerate(pages):
-        with nav_cols[i]:
-            st.page_link(href, label=f"**{label}**" if page_id == current_page else label)
+        cols = st.columns([1, 1, 0.8, 4, 1])
+        with cols[0]:
+            st.page_link("app.py", label="트렌드 대시보드")
+        with cols[1]:
+            st.page_link("pages/1_search.py", label="키워드 검색")
+        with cols[2]:
+            st.page_link("pages/2_settings.py", label="설정")
 
-    def _sync_theme():
-        st.session_state["_theme_pref"] = st.session_state["theme_light"]
+        def _sync_theme():
+            st.session_state["_theme_pref"] = st.session_state["theme_light"]
 
-    with nav_cols[4]:
-        st.toggle(
-            "라이트",
-            value=st.session_state["_theme_pref"],
-            key="theme_light",
-            on_change=_sync_theme,
-        )
+        with cols[4]:
+            st.toggle(
+                "라이트",
+                value=st.session_state["_theme_pref"],
+                key="theme_light",
+                on_change=_sync_theme,
+            )
