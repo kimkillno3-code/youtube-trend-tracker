@@ -56,9 +56,14 @@ def inject_custom_css():
         border-bottom: none !important;
     }
     /* 사이드바 토글 버튼: ">>" → 햄버거 아이콘 */
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="collapsedControl"] {
+        z-index: 999 !important;
+    }
     [data-testid="stSidebarCollapsedControl"] button,
     [data-testid="collapsedControl"] button,
-    button[data-testid="baseButton-headerNoPadding"] {
+    header[data-testid="stHeader"] button[kind="headerNoPadding"],
+    header[data-testid="stHeader"] button[data-testid="baseButton-headerNoPadding"] {
         background: rgba(255,255,255,0.06) !important;
         border: 1px solid rgba(255,255,255,0.1) !important;
         border-radius: 8px !important;
@@ -66,23 +71,30 @@ def inject_custom_css():
         display: flex !important; align-items: center !important;
         justify-content: center !important;
         font-size: 0 !important;
+        color: transparent !important;
+        overflow: hidden !important;
     }
     [data-testid="stSidebarCollapsedControl"] button svg,
     [data-testid="collapsedControl"] button svg,
-    button[data-testid="baseButton-headerNoPadding"] svg {
+    header[data-testid="stHeader"] button[kind="headerNoPadding"] svg,
+    header[data-testid="stHeader"] button[data-testid="baseButton-headerNoPadding"] svg {
         display: none !important;
     }
     [data-testid="stSidebarCollapsedControl"] button::after,
     [data-testid="collapsedControl"] button::after,
-    button[data-testid="baseButton-headerNoPadding"]::after {
-        content: '\\2630';
+    header[data-testid="stHeader"] button[kind="headerNoPadding"]::after,
+    header[data-testid="stHeader"] button[data-testid="baseButton-headerNoPadding"]::after {
+        content: '\\2630' !important;
         font-size: 1.2rem !important;
-        color: #E6EDF3;
+        color: #E6EDF3 !important;
         line-height: 1;
     }
-    /* Streamlit Cloud Fork/GitHub 버튼 숨김 (툴바 자체는 유지) */
+    /* Streamlit 우측 상단 메뉴 + Fork/GitHub 버튼 숨김 */
+    #MainMenu,
+    [data-testid="stMainMenu"],
     [data-testid="stToolbar"] [data-testid="stToolbarActions"],
-    [data-testid="stToolbar"] .stActionButton {
+    [data-testid="stToolbar"] .stActionButton,
+    header[data-testid="stHeader"] [data-testid="stMainMenu"] {
         display: none !important;
     }
     /* Streamlit 상단 컬러바 / 런닝 인디케이터 */
