@@ -74,10 +74,10 @@ def inject_custom_css():
         color: transparent !important;
         overflow: hidden !important;
     }
-    [data-testid="stSidebarCollapsedControl"] button svg,
-    [data-testid="collapsedControl"] button svg,
-    header[data-testid="stHeader"] button[kind="headerNoPadding"] svg,
-    header[data-testid="stHeader"] button[data-testid="baseButton-headerNoPadding"] svg {
+    [data-testid="stSidebarCollapsedControl"] button > *,
+    [data-testid="collapsedControl"] button > *,
+    header[data-testid="stHeader"] button[kind="headerNoPadding"] > *,
+    header[data-testid="stHeader"] button[data-testid="baseButton-headerNoPadding"] > * {
         display: none !important;
     }
     [data-testid="stSidebarCollapsedControl"] button::after,
