@@ -2,6 +2,7 @@
 다크 모드 강제 적용. WCAG AA 명도 대비 교정. 간격 체계 재설계. 탭 대비 강화.
 """
 import html as html_lib
+from pathlib import Path
 import streamlit as st
 
 # ── 디자인 토큰 ──
@@ -1463,16 +1464,20 @@ def render_page_header(title: str, subtitle: str = "",
         f'<div class="subtitle">{html_lib.escape(subtitle)}</div>'
         if subtitle else ""
     )
-    guide_html = (
-        '<a class="guide-link" href="app/static/guide.html" target="_blank">'
-        '<b>사용자 가이드</b></a>'
-        if show_guide else ""
-    )
     st.markdown(
-        f'<div class="page-header">{guide_html}'
+        f'<div class="page-header">'
         f'<h1>{html_lib.escape(title)}</h1>{sub_html}</div>',
         unsafe_allow_html=True,
     )
+    if show_guide:
+        guide_path = Path(__file__).parent / "static" / "guide.html"
+        if guide_path.exists():
+            st.download_button(
+                "사용자 가이드",
+                data=guide_path.read_bytes(),
+                file_name="YT_토픽파인더_가이드.html",
+                mime="text/html",
+            )
 
 
 def render_metric_card(value: str, label: str, color: str = "blue",
