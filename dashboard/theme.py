@@ -99,17 +99,25 @@ def inject_custom_css():
     }
     /* Streamlit Cloud 하단 배지/워터마크 숨김 */
     footer,
-    .reportview-container .main footer,
+    .stApp footer,
     [data-testid="manage-app-button"],
     [data-testid="stAppDeployButton"],
+    [data-testid="stBottom"],
+    [data-testid="stBottomBlockContainer"],
     a[href*="streamlit.io"],
-    .viewerBadge_container__r5tak,
     div[class*="viewerBadge"],
-    .stApp footer {
+    div[class*="HostButton"],
+    div[class*="hostToolbar"],
+    div[class*="StatusWidget"],
+    ._container_gzau3_1,
+    ._link_gzau3_18,
+    ._profileContainer_gzau3_53 {
         display: none !important;
         visibility: hidden !important;
         height: 0 !important;
         overflow: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }
     /* Streamlit 상단 컬러바 / 런닝 인디케이터 */
     .stApp > div:first-child > div:first-child,
