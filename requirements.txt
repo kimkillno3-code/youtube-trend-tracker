@@ -1,0 +1,14 @@
+google-api-python-client==2.149.0
+google-auth==2.35.0
+requests==2.32.3
+pandas==2.2.3
+pytz==2024.2
+python-dateutil==2.9.0
+python-dotenv==1.0.1
+streamlit==1.41.0
+plotly==5.24.1
+openpyxl==3.1.5
+trendspyg>=0.4.0
+pytrends>=4.9.0
+streamlit-autorefresh>=1.0.1
+streamlit-calendar>=1.2.0
