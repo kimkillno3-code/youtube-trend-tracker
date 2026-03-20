@@ -237,10 +237,8 @@ with tab_realtime:
     render_tab_content(realtime_videos, "실시간", "realtime_cat_filter", pills_group=0)
 
 with tab_weekly:
-    col_btn, col_toggle = st.columns([3, 7])
-    with col_btn:
-        if st.button("주간 인기 영상 분석", type="primary", use_container_width=False):
-            do_weekly_trend()
+    if st.button("주간 인기 영상 분석", type="primary", use_container_width=False):
+        do_weekly_trend()
     st.caption("현재 인기 급상승 영상 50개를 조회수 기준으로 정렬하여 TOP 30을 보여줍니다.")
     weekly_videos = repo.get_latest_by_source("weekly", limit=30)
     if weekly_videos:
@@ -249,13 +247,12 @@ with tab_weekly:
         realtime_ids = {v["video_id"] for v in realtime_videos}
         overlap_count = sum(1 for v in weekly_videos if v["video_id"] in realtime_ids)
         if overlap_count > 0:
-            with col_toggle:
-                hide_dup = st.toggle(
-                    f"실시간 중복 제외 ({overlap_count}개)",
-                    key="hide_weekly_dup",
-                )
-                if hide_dup:
-                    weekly_videos = [v for v in weekly_videos if v["video_id"] not in realtime_ids]
+            hide_dup = st.toggle(
+                f"실시간 중복 제외 ({overlap_count}개)",
+                key="hide_weekly_dup",
+            )
+            if hide_dup:
+                weekly_videos = [v for v in weekly_videos if v["video_id"] not in realtime_ids]
     render_tab_content(weekly_videos, "주간", "weekly_cat_filter", pills_group=1)
 
 with tab_analysis:
