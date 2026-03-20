@@ -750,6 +750,38 @@ def inject_custom_css():
     else:
         st.markdown("<style>/* dark-mode-active */</style>", unsafe_allow_html=True)
 
+    # Streamlit Cloud 배지 JS로 제거 (CSS로 안 잡히는 요소)
+    import streamlit.components.v1 as _components
+    _components.html("""
+    <script>
+    (function(){
+        function removeBadges(){
+            var doc = window.parent.document;
+            // position:fixed 하단 요소 중 배지 제거
+            doc.querySelectorAll('a[href*="streamlit.io"], a[href*="streamlit.app"]').forEach(function(el){
+                el.style.display='none';
+                if(el.parentElement) el.parentElement.style.display='none';
+            });
+            // 하단 고정 배지 컨테이너
+            doc.querySelectorAll('[data-testid="manage-app-button"], [data-testid="stStatusWidget"]').forEach(function(el){
+                el.style.display='none';
+            });
+            // body 직속 fixed 요소 중 배지 탐색
+            doc.querySelectorAll('body > div, body > a, body > iframe').forEach(function(el){
+                var s = window.parent.getComputedStyle(el);
+                if(s.position==='fixed' && parseInt(s.bottom||'999') < 100 ){
+                    el.style.display='none';
+                }
+            });
+        }
+        removeBadges();
+        setTimeout(removeBadges, 500);
+        setTimeout(removeBadges, 1500);
+        setTimeout(removeBadges, 3000);
+    })();
+    </script>
+    """, height=0, scrolling=False)
+
 
 def _inject_light_overrides():
     """라이트 모드: 다크 CSS 위에 색상만 오버라이드"""
