@@ -60,9 +60,14 @@ def inject_custom_css():
         max-height: 0 !important;
         overflow: visible !important;
         pointer-events: none !important;
+        position: absolute !important;
     }
     header[data-testid="stHeader"] button {
         pointer-events: auto !important;
+    }
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="collapsedControl"] {
+        position: absolute !important;
     }
     .stApp [data-testid="stAppViewContainer"] > .stMainBlockContainer,
     .stApp .block-container {
