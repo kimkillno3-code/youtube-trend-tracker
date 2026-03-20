@@ -806,25 +806,47 @@ def inject_custom_css():
 
         // 4) 모바일 사이드바 자동 닫기
         if (w.innerWidth <= 768) {
-            // 이전 페이지에서 설정한 플래그 확인 → 사이드바 닫기
-            if (sessionStorage.getItem('_yt_close_sidebar')) {
-                sessionStorage.removeItem('_yt_close_sidebar');
-                function closeSidebar() {
-                    var sidebar = doc.querySelector('section[data-testid="stSidebar"]');
-                    var btns = [
-                        doc.querySelector('[data-testid="stSidebarCollapseButton"] button'),
-                        doc.querySelector('[data-testid="stSidebarNavCollapseButton"] button'),
-                        sidebar ? sidebar.querySelector('button[data-testid="baseButton-headerNoPadding"]') : null,
-                        sidebar ? sidebar.querySelector('button[kind="headerNoPadding"]') : null,
-                    ];
-                    for (var i = 0; i < btns.length; i++) {
-                        if (btns[i]) { btns[i].click(); return; }
+            var _flag = sessionStorage.getItem('_yt_close_sidebar');
+            if (_flag) {
+                var _elapsed = Date.now() - (parseInt(_flag) || 0);
+                if (_elapsed < 5000) {
+                    // (a) CSS로 사이드바 즉시 숨김 (깜빡임 방지)
+                    if (!doc.getElementById('_yt_hide_sidebar')) {
+                        var _s = doc.createElement('style');
+                        _s.id = '_yt_hide_sidebar';
+                        _s.textContent = 'section[data-testid="stSidebar"]{transform:translateX(-100%)!important;transition:none!important;}';
+                        doc.head.appendChild(_s);
                     }
+                    // (b) 닫기 버튼 반복 클릭 (Streamlit rerun 대응)
+                    function _clickClose() {
+                        var btn = doc.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
+                                  doc.querySelector('[data-testid="stSidebarNavCollapseButton"] button');
+                        if (btn) {
+                            btn.click();
+                            sessionStorage.removeItem('_yt_close_sidebar');
+                            setTimeout(function(){
+                                var el = doc.getElementById('_yt_hide_sidebar');
+                                if (el) el.remove();
+                            }, 400);
+                            return true;
+                        }
+                        return false;
+                    }
+                    setTimeout(_clickClose, 150);
+                    setTimeout(function(){ if(!_clickClose()) setTimeout(_clickClose, 500); }, 600);
+                    // 안전장치: 5초 후 CSS 강제 제거
+                    setTimeout(function(){
+                        sessionStorage.removeItem('_yt_close_sidebar');
+                        var el = doc.getElementById('_yt_hide_sidebar');
+                        if (el) el.remove();
+                    }, 5000);
+                } else {
+                    sessionStorage.removeItem('_yt_close_sidebar');
+                    var el = doc.getElementById('_yt_hide_sidebar');
+                    if (el) el.remove();
                 }
-                setTimeout(closeSidebar, 100);
-                setTimeout(closeSidebar, 400);
             }
-            // 사이드바 페이지 링크에 클릭 핸들러 추가
+            // 사이드바 링크 클릭 시 → CSS 즉시 삽입 + 플래그 설정
             function setupAutoClose() {
                 var sidebar = doc.querySelector('section[data-testid="stSidebar"]');
                 if (!sidebar) return;
@@ -832,7 +854,14 @@ def inject_custom_css():
                     if (link._ytAutoClose) return;
                     link._ytAutoClose = true;
                     link.addEventListener('click', function() {
-                        sessionStorage.setItem('_yt_close_sidebar', '1');
+                        sessionStorage.setItem('_yt_close_sidebar', Date.now().toString());
+                        // 클릭 즉시 부모 DOM에 CSS 삽입 → 네비게이션 중 사이드바 숨김
+                        if (!doc.getElementById('_yt_hide_sidebar')) {
+                            var s = doc.createElement('style');
+                            s.id = '_yt_hide_sidebar';
+                            s.textContent = 'section[data-testid="stSidebar"]{transform:translateX(-100%)!important;transition:none!important;}';
+                            doc.head.appendChild(s);
+                        }
                     });
                 });
             }
