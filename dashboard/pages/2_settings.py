@@ -108,7 +108,13 @@ if logs:
         status = log.get("status", "unknown")
         icon = {"success": "✅", "failed": "❌", "running": "🔄"}.get(status, "⬜")
         run_type = log.get("run_type", "-")
-        started = (log.get("run_started_at") or "")[:16].replace("T", " ")
+        raw_started = log.get("run_started_at") or ""
+        try:
+            from datetime import datetime as _dt, timezone, timedelta
+            _utc = _dt.fromisoformat(raw_started.replace("Z", "+00:00"))
+            started = _utc.astimezone(timezone(timedelta(hours=9))).strftime("%Y-%m-%d %H:%M")
+        except Exception:
+            started = raw_started[:16].replace("T", " ")
         videos = log.get("videos_collected", 0)
         quota = log.get("quota_used", 0)
         error = log.get("error_message")

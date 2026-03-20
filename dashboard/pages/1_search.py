@@ -2,7 +2,7 @@
 import html as html_lib
 import sys
 import zipfile
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from io import BytesIO
 from pathlib import Path
 
@@ -65,7 +65,7 @@ if submitted:
         st.stop()
     else:
         api = YouTubeAPIClient(YOUTUBE_API_KEY)
-        collected_at = datetime.now().isoformat()
+        collected_at = datetime.now(timezone(timedelta(hours=9))).isoformat()
         log_id = repo.log_start("search")
 
         try:

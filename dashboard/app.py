@@ -1,8 +1,10 @@
 """YouTube 토픽 파인더 — 트렌드 대시보드"""
 import sys
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from io import BytesIO
 from pathlib import Path
+
+KST = timezone(timedelta(hours=9))
 
 import pandas as pd
 import plotly.express as px
@@ -68,7 +70,7 @@ def do_realtime_collect():
         )
         return
     api = YouTubeAPIClient(YOUTUBE_API_KEY)
-    collected_at = datetime.now().isoformat()
+    collected_at = datetime.now(KST).isoformat()
     log_id = repo.log_start("realtime")
     try:
         with st.spinner("실시간 인기 영상을 가져오고 있어요..."):
@@ -94,7 +96,7 @@ def do_weekly_trend():
         )
         return
     api = YouTubeAPIClient(YOUTUBE_API_KEY)
-    collected_at = datetime.now().isoformat()
+    collected_at = datetime.now(KST).isoformat()
     log_id = repo.log_start("weekly_trend")
     try:
         with st.spinner("주간 인기 영상을 분석하고 있어요..."):
@@ -193,10 +195,15 @@ def render_tab_content(videos, source_label, cat_key, rank_field="trending_rank"
 # ══════════════════════════════════════
 
 last_time = repo.get_last_collection_time()
-subtitle = (
-    f"마지막 수집: {last_time[:16].replace('T', ' ')}"
-    if last_time else "첫 트렌드 분석을 시작해보세요"
-)
+if last_time:
+    try:
+        _utc = datetime.fromisoformat(last_time.replace("Z", "+00:00"))
+        _kst = _utc.astimezone(KST)
+        subtitle = f"마지막 수집: {_kst.strftime('%Y-%m-%d %H:%M')}"
+    except Exception:
+        subtitle = f"마지막 수집: {last_time[:16].replace('T', ' ')}"
+else:
+    subtitle = "첫 트렌드 분석을 시작해보세요"
 render_page_header("트렌드 대시보드", subtitle)
 
 # ── 탭 ──
