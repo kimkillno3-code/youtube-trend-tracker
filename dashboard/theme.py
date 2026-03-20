@@ -75,10 +75,6 @@ def inject_custom_css():
         padding: 0 !important;
         line-height: 0 !important;
     }
-    /* 사이드바 내부 상단 스페이서 제거 */
-    .e1dbuyne10 {
-        display: none !important;
-    }
     /* 사이드바 토글 버튼: ">>" → 햄버거 아이콘 (크기는 Streamlit 기본값 유지) */
     [data-testid="stSidebarCollapsedControl"],
     [data-testid="collapsedControl"] {
