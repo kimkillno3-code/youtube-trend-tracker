@@ -1,5 +1,6 @@
 """환경 설정 중앙화"""
 import os
+from datetime import timezone, timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -28,6 +29,7 @@ YOUTUBE_API_KEY = _get_secret("YOUTUBE_API_KEY")
 YOUTUBE_REGION_CODE = "KR"
 YOUTUBE_LANGUAGE = "ko"
 YOUTUBE_DAILY_QUOTA = 10000
+KST = timezone(timedelta(hours=9))  # 한국 표준시
 
 # 이메일 (SMTP)
 SMTP_SERVER = _get_secret("SMTP_SERVER", "smtp.gmail.com")

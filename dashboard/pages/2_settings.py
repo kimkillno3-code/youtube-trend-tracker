@@ -7,7 +7,7 @@ import streamlit as st
 ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.config import YOUTUBE_API_KEY, YOUTUBE_DAILY_QUOTA, DB_PATH
+from src.config import YOUTUBE_API_KEY, YOUTUBE_DAILY_QUOTA, DB_PATH, KST
 from src.database.repository import TrendRepository
 from dashboard.theme import (
     inject_custom_css, sidebar_with_badges,
@@ -110,9 +110,9 @@ if logs:
         run_type = log.get("run_type", "-")
         raw_started = log.get("run_started_at") or ""
         try:
-            from datetime import datetime as _dt, timezone, timedelta
-            _utc = _dt.fromisoformat(raw_started.replace("Z", "+00:00"))
-            started = _utc.astimezone(timezone(timedelta(hours=9))).strftime("%Y-%m-%d %H:%M")
+            from datetime import datetime as _dt
+            _parsed = _dt.fromisoformat(raw_started.replace("Z", "+00:00"))
+            started = _parsed.astimezone(KST).strftime("%Y-%m-%d %H:%M")
         except Exception:
             started = raw_started[:16].replace("T", " ")
         videos = log.get("videos_collected", 0)

@@ -1,10 +1,8 @@
 """YouTube 토픽 파인더 — 트렌드 대시보드"""
 import sys
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 from io import BytesIO
 from pathlib import Path
-
-KST = timezone(timedelta(hours=9))
 
 import pandas as pd
 import plotly.express as px
@@ -13,7 +11,7 @@ import streamlit as st
 ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.config import YOUTUBE_API_KEY, DB_PATH, DATA_DIR
+from src.config import YOUTUBE_API_KEY, DB_PATH, DATA_DIR, KST
 from src.collector.youtube_api import YouTubeAPIClient
 from src.collector.trending import collect_trending, save_snapshots
 from src.database.repository import TrendRepository

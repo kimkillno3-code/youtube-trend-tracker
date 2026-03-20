@@ -2,7 +2,7 @@
 import html as html_lib
 import sys
 import zipfile
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 from io import BytesIO
 from pathlib import Path
 
@@ -13,7 +13,7 @@ import streamlit as st
 ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(ROOT))
 
-from src.config import YOUTUBE_API_KEY, DB_PATH, DATA_DIR
+from src.config import YOUTUBE_API_KEY, DB_PATH, DATA_DIR, KST
 from src.collector.youtube_api import YouTubeAPIClient
 from src.collector.search import search_and_collect
 from src.database.repository import TrendRepository
@@ -65,7 +65,7 @@ if submitted:
         st.stop()
     else:
         api = YouTubeAPIClient(YOUTUBE_API_KEY)
-        collected_at = datetime.now(timezone(timedelta(hours=9))).isoformat()
+        collected_at = datetime.now(KST).isoformat()
         log_id = repo.log_start("search")
 
         try:

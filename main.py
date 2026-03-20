@@ -8,7 +8,7 @@ from pathlib import Path
 # 프로젝트 루트를 path에 추가
 sys.path.insert(0, str(Path(__file__).parent))
 
-from src.config import YOUTUBE_API_KEY, NOTIFICATION_CHANNELS, DB_PATH, DATA_DIR
+from src.config import YOUTUBE_API_KEY, NOTIFICATION_CHANNELS, DB_PATH, DATA_DIR, KST
 from src.collector.youtube_api import YouTubeAPIClient
 from src.collector.trending import collect_trending, save_snapshots
 from src.collector.search import search_and_collect
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 def cmd_collect(repo: TrendRepository, api: YouTubeAPIClient, max_results: int = 30):
     """인기 영상 수집"""
     log_id = repo.log_start("auto")
-    collected_at = datetime.now().isoformat()
+    collected_at = datetime.now(KST).isoformat()
 
     try:
         videos = collect_trending(api, max_results=max_results)
@@ -46,7 +46,7 @@ def cmd_search(repo: TrendRepository, api: YouTubeAPIClient, keyword: str,
                max_results: int = 25, order: str = "viewCount", days: int = 7):
     """키워드 검색"""
     log_id = repo.log_start("search")
-    collected_at = datetime.now().isoformat()
+    collected_at = datetime.now(KST).isoformat()
 
     try:
         videos = search_and_collect(api, keyword, max_results=max_results, order=order, days_ago=days)

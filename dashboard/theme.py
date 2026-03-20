@@ -757,12 +757,13 @@ def inject_custom_css():
     else:
         st.markdown("<style>/* dark-mode-active */</style>", unsafe_allow_html=True)
 
-    # Streamlit Cloud 배지 JS로 제거 (CSS로 안 잡히는 요소)
+    # Streamlit Cloud 배지 제거 + 모바일 사이드바 자동 닫기
     import streamlit.components.v1 as _components
     _components.html("""
     <script>
     (function(){
         var doc = window.parent.document;
+        var w = window.parent;
 
         // 1) parent document에 CSS 주입
         var style = doc.createElement('style');
@@ -782,7 +783,7 @@ def inject_custom_css():
         function removeBadges(){
             doc.querySelectorAll('body > div, body > a, body > section, body > aside').forEach(function(el){
                 if(el.querySelector('.stApp')) return;
-                var s = window.parent.getComputedStyle(el);
+                var s = w.getComputedStyle(el);
                 if(s.position==='fixed' || s.position==='absolute'){
                     var b = parseInt(s.bottom||'999');
                     var r = parseInt(s.right||'999');
@@ -802,6 +803,42 @@ def inject_custom_css():
         var observer = new MutationObserver(function(){ removeBadges(); });
         observer.observe(doc.body, { childList: true, subtree: true });
         setTimeout(function(){ observer.disconnect(); }, 10000);
+
+        // 4) 모바일 사이드바 자동 닫기
+        if (w.innerWidth <= 768) {
+            // 이전 페이지에서 설정한 플래그 확인 → 사이드바 닫기
+            if (sessionStorage.getItem('_yt_close_sidebar')) {
+                sessionStorage.removeItem('_yt_close_sidebar');
+                function closeSidebar() {
+                    var sidebar = doc.querySelector('section[data-testid="stSidebar"]');
+                    var btns = [
+                        doc.querySelector('[data-testid="stSidebarCollapseButton"] button'),
+                        doc.querySelector('[data-testid="stSidebarNavCollapseButton"] button'),
+                        sidebar ? sidebar.querySelector('button[data-testid="baseButton-headerNoPadding"]') : null,
+                        sidebar ? sidebar.querySelector('button[kind="headerNoPadding"]') : null,
+                    ];
+                    for (var i = 0; i < btns.length; i++) {
+                        if (btns[i]) { btns[i].click(); return; }
+                    }
+                }
+                setTimeout(closeSidebar, 100);
+                setTimeout(closeSidebar, 400);
+            }
+            // 사이드바 페이지 링크에 클릭 핸들러 추가
+            function setupAutoClose() {
+                var sidebar = doc.querySelector('section[data-testid="stSidebar"]');
+                if (!sidebar) return;
+                sidebar.querySelectorAll('.stPageLink a').forEach(function(link) {
+                    if (link._ytAutoClose) return;
+                    link._ytAutoClose = true;
+                    link.addEventListener('click', function() {
+                        sessionStorage.setItem('_yt_close_sidebar', '1');
+                    });
+                });
+            }
+            setTimeout(setupAutoClose, 300);
+            setTimeout(setupAutoClose, 800);
+        }
     })();
     </script>
     """, height=0, scrolling=False)
