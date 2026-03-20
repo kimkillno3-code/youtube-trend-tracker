@@ -18,7 +18,7 @@ st.set_page_config(page_title="설정 - YT", layout="wide")
 
 repo = TrendRepository(str(DB_PATH))
 inject_custom_css()
-sidebar_with_badges(repo)
+sidebar_with_badges(repo, current_page="settings")
 render_page_header("설정", "API 키 관리 및 시스템 상태")
 
 

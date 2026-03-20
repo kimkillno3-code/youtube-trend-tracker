@@ -31,7 +31,7 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 repo = TrendRepository(str(DB_PATH))
 
 inject_custom_css()
-sidebar_with_badges(repo)
+sidebar_with_badges(repo, current_page="dashboard")
 
 try:
     from streamlit_autorefresh import st_autorefresh

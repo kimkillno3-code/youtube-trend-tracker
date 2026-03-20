@@ -46,22 +46,17 @@ def inject_custom_css():
         -webkit-font-smoothing: antialiased;
     }
     [data-testid="stSidebarNav"] { display: none !important; }
-    /* 상단 장식/바 제거 (헤더 컨테이너는 유지) */
+    /* Streamlit 기본 헤더/툴바/장식 전부 숨김 (GNB로 대체) */
     .stApp [data-testid="stStatusWidget"],
     .stDeployButton,
     [data-testid="stDecoration"],
-    .stDecoration { display: none !important; }
+    .stDecoration,
+    [data-testid="stToolbar"] { display: none !important; }
     header[data-testid="stHeader"] {
-        background: #0D1117 !important;
+        background: transparent !important;
         border-bottom: none !important;
-    }
-    /* 데스크톱: 헤더+툴바 숨김 */
-    @media (min-width: 769px) {
-        [data-testid="stToolbar"] { display: none !important; }
-        header[data-testid="stHeader"] {
-            height: 0 !important; min-height: 0 !important;
-            padding: 0 !important; overflow: hidden !important;
-        }
+        height: 0 !important; min-height: 0 !important;
+        padding: 0 !important; overflow: hidden !important;
     }
     /* Streamlit 상단 컬러바 / 런닝 인디케이터 */
     .stApp > div:first-child > div:first-child,
@@ -105,57 +100,78 @@ def inject_custom_css():
     }
 
     /* ═══════════════════════════════════
-       SIDEBAR
+       SIDEBAR 숨김 (GNB로 대체)
        ═══════════════════════════════════ */
-    section[data-testid="stSidebar"] {
-        background: #0B0E14 !important;
-        border-right: 1px solid rgba(255,255,255,0.06);
+    section[data-testid="stSidebar"] { display: none !important; }
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="collapsedControl"] { display: none !important; }
+
+    /* ═══════════════════════════════════
+       GNB (상단 네비게이션)
+       ═══════════════════════════════════ */
+    .gnb-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 24px;
+        background: #0B0E14;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        position: sticky;
+        top: 0;
+        z-index: 999;
     }
-    section[data-testid="stSidebar"] hr {
-        border-color: rgba(255,255,255,0.08) !important;
-        margin: 12px 0 !important;
+    .gnb-left {
+        display: flex;
+        align-items: center;
+        gap: 28px;
     }
-    /* 사이드바 전체 텍스트 — 다크 모드 고대비 */
-    section[data-testid="stSidebar"] label,
-    section[data-testid="stSidebar"] span,
-    section[data-testid="stSidebar"] p,
-    section[data-testid="stSidebar"] div,
-    section[data-testid="stSidebar"] .stMarkdown,
-    section[data-testid="stSidebar"] .stMarkdown p {
-        color: #C9D1D9 !important;
+    .gnb-logo {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
     }
-    /* 사이드바 토글 라벨 */
-    section[data-testid="stSidebar"] [data-testid="stToggle"] label span,
-    section[data-testid="stSidebar"] .stToggle label span {
-        color: #C9D1D9 !important;
+    .gnb-logo .yt { font-weight: 900; font-size: 1.1rem; color: #FF4757; }
+    .gnb-logo .name { font-weight: 700; font-size: 0.9rem; color: #F0F2F5; }
+    .gnb-nav {
+        display: flex;
+        gap: 4px;
     }
-    /* 사이드바 캡션 */
-    section[data-testid="stSidebar"] [data-testid="stCaption"],
-    section[data-testid="stSidebar"] .stCaption {
-        color: #9BA3B0 !important;
+    .gnb-nav a {
+        color: #8B949E;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 500;
+        padding: 6px 14px;
+        border-radius: 6px;
+        transition: all 0.15s;
     }
-    /* 사이드바 버튼 */
-    section[data-testid="stSidebar"] .stButton > button {
-        background: #141820 !important;
-        border: 1px solid rgba(255,255,255,0.1) !important;
-        color: #E6EDF3 !important;
+    .gnb-nav a:hover { color: #E6EDF3; background: rgba(255,255,255,0.06); }
+    .gnb-nav a.active { color: #FFFFFF; background: #1A1F2B; }
+    .gnb-right {
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
-    section[data-testid="stSidebar"] .stButton > button:hover {
-        background: #1A1F2B !important;
-        border-color: rgba(255,255,255,0.2) !important;
+    .gnb-right .gnb-info {
+        font-size: 0.72rem;
+        color: #6E7681;
     }
-    /* 페이지 링크 */
-    section[data-testid="stSidebar"] .stPageLink a {
-        color: #C9D1D9 !important;
-        font-size: 0.85rem !important;
-        font-weight: 500 !important;
-        padding: 8px 12px !important;
-        border-radius: 8px !important;
+    .gnb-toggle {
+        cursor: pointer;
+        background: none;
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 6px;
+        padding: 4px 10px;
+        font-size: 0.75rem;
+        color: #8B949E;
+        transition: all 0.15s;
     }
-    section[data-testid="stSidebar"] .stPageLink a:hover,
-    section[data-testid="stSidebar"] .stPageLink a[aria-current="page"] {
-        background: #1A1F2B !important;
-        color: #FFFFFF !important;
+    .gnb-toggle:hover { border-color: rgba(255,255,255,0.2); color: #E6EDF3; }
+    @media (max-width: 768px) {
+        .gnb-bar { padding: 8px 12px; }
+        .gnb-nav a { font-size: 0.78rem; padding: 5px 10px; }
+        .gnb-right .gnb-info { display: none; }
     }
 
     /* ═══════════════════════════════════
@@ -719,44 +735,15 @@ def _inject_light_overrides():
         background-color: #FAFBFC !important;
         color: #24292F !important;
     }
-    section[data-testid="stSidebar"] {
-        background: #F6F8FA !important;
-        border-right-color: rgba(0,0,0,0.08) !important;
-    }
-    section[data-testid="stSidebar"] hr { border-color: rgba(0,0,0,0.08) !important; }
-    section[data-testid="stSidebar"] .stPageLink a { color: #656D76 !important; }
-    section[data-testid="stSidebar"] .stPageLink a:hover,
-    section[data-testid="stSidebar"] .stPageLink a[aria-current="page"] {
-        background: #ECEEF0 !important; color: #24292F !important;
-    }
-    /* 사이드바 전체 텍스트/라벨 */
-    section[data-testid="stSidebar"] label,
-    section[data-testid="stSidebar"] span,
-    section[data-testid="stSidebar"] p,
-    section[data-testid="stSidebar"] div,
-    section[data-testid="stSidebar"] .stMarkdown,
-    section[data-testid="stSidebar"] .stMarkdown p {
-        color: #24292F !important;
-    }
-    /* 사이드바 토글 */
-    section[data-testid="stSidebar"] [data-testid="stToggle"] label span,
-    section[data-testid="stSidebar"] .stToggle label span {
-        color: #656D76 !important;
-    }
-    /* 사이드바 캡션 */
-    section[data-testid="stSidebar"] [data-testid="stCaption"],
-    section[data-testid="stSidebar"] .stCaption {
-        color: #8B949E !important;
-    }
-    /* 사이드바 버튼 */
-    section[data-testid="stSidebar"] .stButton > button {
-        background: #FFFFFF !important;
-        border-color: rgba(0,0,0,0.12) !important;
-        color: #24292F !important;
-    }
-    section[data-testid="stSidebar"] .stButton > button:hover {
-        background: #ECEEF0 !important;
-    }
+    /* GNB 라이트 모드 */
+    .gnb-bar { background: #F6F8FA !important; border-bottom-color: rgba(0,0,0,0.08) !important; }
+    .gnb-logo .name { color: #24292F !important; }
+    .gnb-nav a { color: #656D76 !important; }
+    .gnb-nav a:hover { color: #24292F !important; background: rgba(0,0,0,0.04) !important; }
+    .gnb-nav a.active { color: #24292F !important; background: #ECEEF0 !important; }
+    .gnb-right .gnb-info { color: #8B949E !important; }
+    .gnb-toggle { color: #656D76 !important; border-color: rgba(0,0,0,0.12) !important; }
+    .gnb-toggle:hover { color: #24292F !important; }
 
     .page-header {
         background: linear-gradient(135deg, #F6F8FA 0%, #ECEEF0 50%, #F0EEF5 100%) !important;
@@ -1204,38 +1191,69 @@ def inject_pills_highlight(selected_labels=None, group_index=0) -> None:
     components.html(js_code, height=0, scrolling=False)
 
 
-def sidebar_with_badges(repo):
-    # 비-위젯 key로 테마 상태 보존 (위젯 key는 페이지 이동 시 초기화될 수 있음)
+def sidebar_with_badges(repo, current_page: str = "dashboard"):
+    """GNB 상단 네비게이션 바 렌더링 (사이드바 대체)."""
+    from datetime import timezone, timedelta
+
     if "_theme_pref" not in st.session_state:
         st.session_state["_theme_pref"] = False
 
-    is_light = st.session_state["_theme_pref"]
-    logo_text_color = "#24292F" if is_light else "#F0F2F5"
-    st.sidebar.markdown(
-        '<div style="padding:12px 0 8px;display:flex;align-items:center;gap:8px;">'
-        '<span style="font-weight:900;font-size:1.15rem;color:#FF4757;">YT</span>'
-        f'<span style="font-weight:700;font-size:0.95rem;color:{logo_text_color};">토픽 파인더</span>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
+    # 마지막 수집 시간 (KST 변환)
+    last_raw = repo.get_last_collection_time()
+    last_kst = ""
+    if last_raw:
+        try:
+            from datetime import datetime as _dt
+            utc_dt = _dt.fromisoformat(last_raw.replace("Z", "+00:00"))
+            kst_dt = utc_dt.astimezone(timezone(timedelta(hours=9)))
+            last_kst = kst_dt.strftime("%m/%d %H:%M")
+        except Exception:
+            last_kst = last_raw[:16].replace("T", " ")
 
+    info_text = f"마지막 수집: {last_kst}" if last_kst else ""
+
+    # GNB 로고 + 수집 시간 (HTML)
+    st.markdown(f"""
+    <div class="gnb-bar">
+        <div class="gnb-left">
+            <div class="gnb-logo">
+                <span class="yt">YT</span>
+                <span class="name">토픽 파인더</span>
+            </div>
+        </div>
+        <div class="gnb-right">
+            <span class="gnb-info">{info_text}</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # GNB 네비게이션 (Streamlit page_link로 실제 라우팅)
+    nav_cols = st.columns([1, 1, 1, 4, 1])
+    pages = [
+        ("dashboard", "app.py", "트렌드 대시보드"),
+        ("search", "pages/1_search.py", "키워드 검색"),
+        ("settings", "pages/2_settings.py", "설정"),
+    ]
+    for i, (page_id, href, label) in enumerate(pages):
+        with nav_cols[i]:
+            if page_id == current_page:
+                st.markdown(
+                    f'<div style="text-align:center;padding:6px 0;font-size:0.85rem;'
+                    f'font-weight:600;color:#FFFFFF;background:#1A1F2B;'
+                    f'border-radius:6px;">{label}</div>',
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.page_link(href, label=label)
+
+    # 테마 토글
     def _sync_theme():
         st.session_state["_theme_pref"] = st.session_state["theme_light"]
 
-    st.sidebar.toggle(
-        "라이트 모드",
-        value=st.session_state["_theme_pref"],
-        key="theme_light",
-        on_change=_sync_theme,
-    )
-    st.sidebar.markdown("---")
-
-    st.sidebar.page_link("app.py", label="트렌드 대시보드")
-    st.sidebar.page_link("pages/1_search.py", label="키워드 검색")
-    st.sidebar.page_link("pages/2_settings.py", label="설정")
-
-    st.sidebar.markdown("---")
-
-    last_time = repo.get_last_collection_time()
-    if last_time:
-        st.sidebar.caption(f"마지막 수집: {last_time[:16].replace('T', ' ')}")
+    with nav_cols[4]:
+        st.toggle(
+            "라이트",
+            value=st.session_state["_theme_pref"],
+            key="theme_light",
+            on_change=_sync_theme,
+        )

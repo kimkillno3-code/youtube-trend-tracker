@@ -35,7 +35,7 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 repo = TrendRepository(str(DB_PATH))
 
 inject_custom_css()
-sidebar_with_badges(repo)
+sidebar_with_badges(repo, current_page="search")
 
 render_page_header("키워드 검색", "경쟁 영상을 검색하고 한눈에 분석해보세요")
 
