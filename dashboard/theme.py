@@ -1049,74 +1049,67 @@ def inject_custom_css():
         observer.observe(doc.body, { childList: true, subtree: true });
         setTimeout(function(){ observer.disconnect(); }, 10000);
 
-        // 4) 모바일 사이드바 자동 닫기 (이벤트 위임 방식 — DOM 교체에도 유지)
-        var HIDE_CSS = 'section[data-testid="stSidebar"]{transform:translateX(-100%)!important;transition:none!important;}';
-
-        function _removeSidebarHide() {
-            sessionStorage.removeItem('_yt_close_sidebar');
-            var el = doc.getElementById('_yt_hide_sidebar');
-            if (el) el.remove();
-        }
-
-        function _addSidebarHide() {
-            if (!doc.getElementById('_yt_hide_sidebar')) {
-                var s = doc.createElement('style');
-                s.id = '_yt_hide_sidebar';
-                s.textContent = HIDE_CSS;
-                doc.head.appendChild(s);
-            }
-        }
-
-        function _closeSidebar() {
-            // ESC 키 디스패치로 Streamlit 내부 상태 동기화
-            doc.dispatchEvent(new KeyboardEvent('keydown', {
-                key: 'Escape', code: 'Escape', keyCode: 27, bubbles: true
-            }));
-            // 폴백: 닫기 버튼 직접 클릭
-            var btn = doc.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
-                      doc.querySelector('[data-testid="stSidebarNavCollapseButton"] button') ||
-                      doc.querySelector('section[data-testid="stSidebar"] button[kind="headerNoPadding"]');
-            if (btn) btn.click();
-        }
-
-        if (w.innerWidth <= 768) {
-            // (a) 페이지 로드 시: 이전 페이지에서 설정한 플래그 확인 → 사이드바 닫기
-            var _flag = sessionStorage.getItem('_yt_close_sidebar');
-            if (_flag) {
-                var _elapsed = Date.now() - (parseInt(_flag) || 0);
-                sessionStorage.removeItem('_yt_close_sidebar');
-                if (_elapsed < 5000) {
-                    _addSidebarHide();
-                    // 약간의 지연 후 ESC + 버튼 클릭으로 닫기
-                    setTimeout(function() { _closeSidebar(); setTimeout(_removeSidebarHide, 400); }, 200);
-                    setTimeout(function() { _closeSidebar(); setTimeout(_removeSidebarHide, 400); }, 600);
-                } else {
-                    _removeSidebarHide();
+        // 4) 모바일 사이드바 자동 닫기
+        // parent document에 <script> 직접 주입 — iframe 생명주기와 무관하게 동작
+        if (!doc.getElementById('_yt_sidebar_js')) {
+            var _sjs = doc.createElement('script');
+            _sjs.id = '_yt_sidebar_js';
+            _sjs.textContent = '(' + function() {
+                var d = document, w = window;
+                var HIDE = 'section[data-testid="stSidebar"]{transform:translateX(-100%)!important;transition:none!important;}';
+                function addHide() {
+                    if (!d.getElementById('_yt_hsb')) {
+                        var s = d.createElement('style'); s.id = '_yt_hsb';
+                        s.textContent = HIDE; d.head.appendChild(s);
+                    }
                 }
-            }
-
-            // (b) 이벤트 위임: parent doc에 한 번만 등록 (페이지 전환에도 유지)
-            if (!doc._ytSidebarDelegate) {
-                doc._ytSidebarDelegate = true;
-                doc.addEventListener('click', function(e) {
+                function removeHide() {
+                    sessionStorage.removeItem('_yt_csb');
+                    var e = d.getElementById('_yt_hsb'); if (e) e.remove();
+                }
+                function tryClose() {
+                    var btn = d.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
+                              d.querySelector('[data-testid="stSidebarNavCollapseButton"] button');
+                    if (btn) { btn.click(); return true; }
+                    return false;
+                }
+                // 클릭 이벤트 위임 (capture phase)
+                d.addEventListener('click', function(e) {
                     if (w.innerWidth > 768) return;
-                    var link = e.target.closest('section[data-testid="stSidebar"] .stPageLink a');
-                    if (link) {
-                        sessionStorage.setItem('_yt_close_sidebar', Date.now().toString());
-                        _addSidebarHide();
+                    // 사이드바 링크 클릭 → 플래그 + 숨김
+                    if (e.target.closest('section[data-testid="stSidebar"] .stPageLink a')) {
+                        sessionStorage.setItem('_yt_csb', Date.now().toString());
+                        addHide();
+                    }
+                    // 열기 버튼 클릭 → 숨김 해제
+                    if (e.target.closest('[data-testid="stSidebarCollapsedControl"]') ||
+                        e.target.closest('[data-testid="collapsedControl"]')) {
+                        removeHide();
                     }
                 }, true);
-            }
-
-            // (c) 열기 버튼 클릭 시 hide CSS 제거
-            if (!doc._ytOpenGuard) {
-                doc._ytOpenGuard = true;
-                doc.addEventListener('click', function(e) {
-                    var openBtn = e.target.closest('[data-testid="stSidebarCollapsedControl"]') ||
-                                  e.target.closest('[data-testid="collapsedControl"]');
-                    if (openBtn) _removeSidebarHide();
-                }, true);
-            }
+                // 페이지 로드 시 플래그 확인 이벤트
+                w.addEventListener('_yt_chk_sb', function() {
+                    var f = sessionStorage.getItem('_yt_csb');
+                    if (!f) return;
+                    var elapsed = Date.now() - (parseInt(f) || 0);
+                    sessionStorage.removeItem('_yt_csb');
+                    if (elapsed > 5000) { removeHide(); return; }
+                    addHide();
+                    function attempt() {
+                        if (tryClose()) { setTimeout(removeHide, 300); }
+                    }
+                    setTimeout(attempt, 200);
+                    setTimeout(attempt, 600);
+                    setTimeout(attempt, 1200);
+                    // 안전장치: 2.5초 후에도 닫기 실패 시 CSS만 유지 (열기 버튼으로 해제)
+                    setTimeout(function() { if (!tryClose()) { /* CSS 유지 */ } else { setTimeout(removeHide, 300); } }, 2500);
+                });
+            } + ')();';
+            doc.head.appendChild(_sjs);
+        }
+        // 매 페이지 로드마다 플래그 확인 트리거
+        if (w.innerWidth <= 768) {
+            w.dispatchEvent(new Event('_yt_chk_sb'));
         }
     })();
     </script>
