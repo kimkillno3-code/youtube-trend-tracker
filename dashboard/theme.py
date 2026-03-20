@@ -1055,10 +1055,10 @@ def render_video_grid_card(video: dict, rank_field: str = "trending_rank") -> No
 
     st.markdown(f'''
     <div class="vgrid">
-        <div class="vg-thumb">
+        <a class="vg-thumb" href="{url}" target="_blank" style="display:block;text-decoration:none;">
             {thumb_html}
             <span class="{rank_cls}">#{rank}</span>
-        </div>
+        </a>
         <div class="vg-body">
             <a class="vg-title" href="{url}" target="_blank">{title}</a>
             <div class="vg-channel">{channel}</div>
