@@ -1464,7 +1464,7 @@ def render_page_header(title: str, subtitle: str = "",
         if subtitle else ""
     )
     guide_html = (
-        '<a class="guide-link" href="./static/guide.html" target="_blank">'
+        '<a class="guide-link" href="app/static/guide.html" target="_blank">'
         '<b>사용자 가이드</b></a>'
         if show_guide else ""
     )
