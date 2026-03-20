@@ -60,14 +60,9 @@ def inject_custom_css():
         max-height: 0 !important;
         overflow: visible !important;
         pointer-events: none !important;
-        position: absolute !important;
     }
     header[data-testid="stHeader"] button {
         pointer-events: auto !important;
-    }
-    [data-testid="stSidebarCollapsedControl"],
-    [data-testid="collapsedControl"] {
-        position: absolute !important;
     }
     .stApp [data-testid="stAppViewContainer"] > .stMainBlockContainer,
     .stApp .block-container {
@@ -1054,7 +1049,7 @@ def inject_custom_css():
         observer.observe(doc.body, { childList: true, subtree: true });
         setTimeout(function(){ observer.disconnect(); }, 10000);
 
-        // 4) 모바일 사이드바 자동 닫기
+        // 4) 모바일 사이드바 자동 닫기 (이벤트 위임 방식 — DOM 교체에도 유지)
         var HIDE_CSS = 'section[data-testid="stSidebar"]{transform:translateX(-100%)!important;transition:none!important;}';
 
         function _removeSidebarHide() {
@@ -1072,78 +1067,56 @@ def inject_custom_css():
             }
         }
 
+        function _closeSidebar() {
+            // ESC 키 디스패치로 Streamlit 내부 상태 동기화
+            doc.dispatchEvent(new KeyboardEvent('keydown', {
+                key: 'Escape', code: 'Escape', keyCode: 27, bubbles: true
+            }));
+            // 폴백: 닫기 버튼 직접 클릭
+            var btn = doc.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
+                      doc.querySelector('[data-testid="stSidebarNavCollapseButton"] button') ||
+                      doc.querySelector('section[data-testid="stSidebar"] button[kind="headerNoPadding"]');
+            if (btn) btn.click();
+        }
+
         if (w.innerWidth <= 768) {
+            // (a) 페이지 로드 시: 이전 페이지에서 설정한 플래그 확인 → 사이드바 닫기
             var _flag = sessionStorage.getItem('_yt_close_sidebar');
             if (_flag) {
                 var _elapsed = Date.now() - (parseInt(_flag) || 0);
                 sessionStorage.removeItem('_yt_close_sidebar');
                 if (_elapsed < 5000) {
-                    // CSS로 사이드바 즉시 숨김
                     _addSidebarHide();
-                    // 닫기 버튼 클릭 시도 (Streamlit 내부 상태 동기화)
-                    function _tryClose() {
-                        var btn = doc.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
-                                  doc.querySelector('[data-testid="stSidebarNavCollapseButton"] button') ||
-                                  doc.querySelector('section[data-testid="stSidebar"] button[kind="headerNoPadding"]');
-                        if (btn) { btn.click(); return true; }
-                        return false;
-                    }
-                    // MutationObserver로 닫기 버튼이 나타날 때까지 감시
-                    var _closeFound = false;
-                    var _closeObs = new MutationObserver(function() {
-                        if (!_closeFound && _tryClose()) {
-                            _closeFound = true;
-                            _closeObs.disconnect();
-                            // 닫기 버튼 클릭 성공 → CSS hide 제거 (Streamlit이 자체 처리)
-                            setTimeout(_removeSidebarHide, 300);
-                        }
-                    });
-                    _closeObs.observe(doc.body, {childList: true, subtree: true});
-                    // 즉시 시도 + 폴백 타이머
-                    if (_tryClose()) {
-                        _closeFound = true;
-                        _closeObs.disconnect();
-                        setTimeout(_removeSidebarHide, 300);
-                    }
-                    // 안전장치: 4초 후에도 못 찾으면 CSS 유지 (열기 버튼으로만 해제)
-                    setTimeout(function() {
-                        _closeObs.disconnect();
-                    }, 4000);
+                    // 약간의 지연 후 ESC + 버튼 클릭으로 닫기
+                    setTimeout(function() { _closeSidebar(); setTimeout(_removeSidebarHide, 400); }, 200);
+                    setTimeout(function() { _closeSidebar(); setTimeout(_removeSidebarHide, 400); }, 600);
                 } else {
                     _removeSidebarHide();
                 }
             }
 
-            // 사이드바 열기 버튼 클릭 시 hide CSS 제거
-            function _guardOpenBtn() {
-                var openBtn = doc.querySelector('[data-testid="stSidebarCollapsedControl"] button') ||
-                              doc.querySelector('[data-testid="collapsedControl"] button');
-                if (openBtn && !openBtn._ytGuard) {
-                    openBtn._ytGuard = true;
-                    openBtn.addEventListener('click', _removeSidebarHide);
-                }
-            }
-            // MutationObserver로 열기 버튼도 감시
-            var _guardObs = new MutationObserver(_guardOpenBtn);
-            _guardObs.observe(doc.body, {childList: true, subtree: true});
-            setTimeout(_guardOpenBtn, 300);
-            setTimeout(function() { _guardObs.disconnect(); }, 6000);
-
-            // 사이드바 링크 클릭 시 → CSS 즉시 삽입 + 플래그 설정
-            function setupAutoClose() {
-                var sidebar = doc.querySelector('section[data-testid="stSidebar"]');
-                if (!sidebar) return;
-                sidebar.querySelectorAll('.stPageLink a').forEach(function(link) {
-                    if (link._ytAutoClose) return;
-                    link._ytAutoClose = true;
-                    link.addEventListener('click', function() {
+            // (b) 이벤트 위임: parent doc에 한 번만 등록 (페이지 전환에도 유지)
+            if (!doc._ytSidebarDelegate) {
+                doc._ytSidebarDelegate = true;
+                doc.addEventListener('click', function(e) {
+                    if (w.innerWidth > 768) return;
+                    var link = e.target.closest('section[data-testid="stSidebar"] .stPageLink a');
+                    if (link) {
                         sessionStorage.setItem('_yt_close_sidebar', Date.now().toString());
                         _addSidebarHide();
-                    });
-                });
+                    }
+                }, true);
             }
-            setTimeout(setupAutoClose, 300);
-            setTimeout(setupAutoClose, 800);
+
+            // (c) 열기 버튼 클릭 시 hide CSS 제거
+            if (!doc._ytOpenGuard) {
+                doc._ytOpenGuard = true;
+                doc.addEventListener('click', function(e) {
+                    var openBtn = e.target.closest('[data-testid="stSidebarCollapsedControl"]') ||
+                                  e.target.closest('[data-testid="collapsedControl"]');
+                    if (openBtn) _removeSidebarHide();
+                }, true);
+            }
         }
     })();
     </script>
