@@ -50,14 +50,14 @@ def inject_custom_css():
     .stApp [data-testid="stStatusWidget"],
     .stDeployButton,
     [data-testid="stDecoration"],
-    .stDecoration,
-    [data-testid="stToolbar"] { display: none !important; }
+    .stDecoration { display: none !important; }
     header[data-testid="stHeader"] {
         background: #0D1117 !important;
         border-bottom: none !important;
     }
-    /* 데스크톱: 헤더 높이 최소화 */
+    /* 데스크톱: 헤더+툴바 숨김 */
     @media (min-width: 769px) {
+        [data-testid="stToolbar"] { display: none !important; }
         header[data-testid="stHeader"] {
             height: 0 !important; min-height: 0 !important;
             padding: 0 !important; overflow: hidden !important;
