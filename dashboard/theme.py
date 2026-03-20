@@ -1050,41 +1050,66 @@ def inject_custom_css():
         setTimeout(function(){ observer.disconnect(); }, 10000);
 
         // 4) 모바일 사이드바 자동 닫기
+        var HIDE_CSS = 'section[data-testid="stSidebar"]{transform:translateX(-100%)!important;transition:none!important;}';
+
         function _removeSidebarHide() {
             sessionStorage.removeItem('_yt_close_sidebar');
             var el = doc.getElementById('_yt_hide_sidebar');
             if (el) el.remove();
         }
 
+        function _addSidebarHide() {
+            if (!doc.getElementById('_yt_hide_sidebar')) {
+                var s = doc.createElement('style');
+                s.id = '_yt_hide_sidebar';
+                s.textContent = HIDE_CSS;
+                doc.head.appendChild(s);
+            }
+        }
+
         if (w.innerWidth <= 768) {
             var _flag = sessionStorage.getItem('_yt_close_sidebar');
             if (_flag) {
                 var _elapsed = Date.now() - (parseInt(_flag) || 0);
-                if (_elapsed < 3000) {
-                    // (a) CSS로 사이드바 즉시 숨김 (깜빡임 방지)
-                    if (!doc.getElementById('_yt_hide_sidebar')) {
-                        var _s = doc.createElement('style');
-                        _s.id = '_yt_hide_sidebar';
-                        _s.textContent = 'section[data-testid="stSidebar"]{transform:translateX(-100%)!important;transition:none!important;}';
-                        doc.head.appendChild(_s);
-                    }
-                    // (b) 닫기 버튼 클릭
-                    function _clickClose() {
+                sessionStorage.removeItem('_yt_close_sidebar');
+                if (_elapsed < 5000) {
+                    // CSS로 사이드바 즉시 숨김
+                    _addSidebarHide();
+                    // 닫기 버튼 클릭 시도 (Streamlit 내부 상태 동기화)
+                    function _tryClose() {
                         var btn = doc.querySelector('[data-testid="stSidebarCollapseButton"] button') ||
-                                  doc.querySelector('[data-testid="stSidebarNavCollapseButton"] button');
-                        if (btn) { btn.click(); _removeSidebarHide(); return true; }
+                                  doc.querySelector('[data-testid="stSidebarNavCollapseButton"] button') ||
+                                  doc.querySelector('section[data-testid="stSidebar"] button[kind="headerNoPadding"]');
+                        if (btn) { btn.click(); return true; }
                         return false;
                     }
-                    setTimeout(_clickClose, 150);
-                    setTimeout(function(){ if(!_clickClose()) setTimeout(_clickClose, 500); }, 600);
-                    // 안전장치: 1.5초 후 CSS 강제 제거 (메뉴 재오픈 차단 방지)
-                    setTimeout(_removeSidebarHide, 1500);
+                    // MutationObserver로 닫기 버튼이 나타날 때까지 감시
+                    var _closeFound = false;
+                    var _closeObs = new MutationObserver(function() {
+                        if (!_closeFound && _tryClose()) {
+                            _closeFound = true;
+                            _closeObs.disconnect();
+                            // 닫기 버튼 클릭 성공 → CSS hide 제거 (Streamlit이 자체 처리)
+                            setTimeout(_removeSidebarHide, 300);
+                        }
+                    });
+                    _closeObs.observe(doc.body, {childList: true, subtree: true});
+                    // 즉시 시도 + 폴백 타이머
+                    if (_tryClose()) {
+                        _closeFound = true;
+                        _closeObs.disconnect();
+                        setTimeout(_removeSidebarHide, 300);
+                    }
+                    // 안전장치: 4초 후에도 못 찾으면 CSS 유지 (열기 버튼으로만 해제)
+                    setTimeout(function() {
+                        _closeObs.disconnect();
+                    }, 4000);
                 } else {
                     _removeSidebarHide();
                 }
             }
 
-            // 사이드바 열기 버튼 클릭 시 hide CSS 제거 (잔존 차단 방지)
+            // 사이드바 열기 버튼 클릭 시 hide CSS 제거
             function _guardOpenBtn() {
                 var openBtn = doc.querySelector('[data-testid="stSidebarCollapsedControl"] button') ||
                               doc.querySelector('[data-testid="collapsedControl"] button');
@@ -1093,8 +1118,11 @@ def inject_custom_css():
                     openBtn.addEventListener('click', _removeSidebarHide);
                 }
             }
+            // MutationObserver로 열기 버튼도 감시
+            var _guardObs = new MutationObserver(_guardOpenBtn);
+            _guardObs.observe(doc.body, {childList: true, subtree: true});
             setTimeout(_guardOpenBtn, 300);
-            setTimeout(_guardOpenBtn, 1000);
+            setTimeout(function() { _guardObs.disconnect(); }, 6000);
 
             // 사이드바 링크 클릭 시 → CSS 즉시 삽입 + 플래그 설정
             function setupAutoClose() {
@@ -1105,12 +1133,7 @@ def inject_custom_css():
                     link._ytAutoClose = true;
                     link.addEventListener('click', function() {
                         sessionStorage.setItem('_yt_close_sidebar', Date.now().toString());
-                        if (!doc.getElementById('_yt_hide_sidebar')) {
-                            var s = doc.createElement('style');
-                            s.id = '_yt_hide_sidebar';
-                            s.textContent = 'section[data-testid="stSidebar"]{transform:translateX(-100%)!important;transition:none!important;}';
-                            doc.head.appendChild(s);
-                        }
+                        _addSidebarHide();
                     });
                 });
             }
