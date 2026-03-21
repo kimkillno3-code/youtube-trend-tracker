@@ -13,10 +13,16 @@ sys.path.insert(0, str(ROOT))
 
 from src.config import YOUTUBE_API_KEY, YOUTUBE_DAILY_QUOTA, DB_PATH, DATA_DIR, KST
 from src.collector.youtube_api import YouTubeAPIClient
-from src.collector.trending import (
-    collect_trending, collect_trending_by_category,
-    collect_popular_by_period, save_snapshots, MAIN_CATEGORIES, COUNTRIES,
-)
+try:
+    from src.collector.trending import (
+        collect_trending, collect_trending_by_category,
+        collect_popular_by_period, save_snapshots, MAIN_CATEGORIES, COUNTRIES,
+    )
+except ImportError as e:
+    import traceback
+    st.error(f"trending import 실패: {e}")
+    st.code(traceback.format_exc())
+    st.stop()
 from src.database.repository import TrendRepository
 from src.analysis.insights import generate_insights
 from dashboard.theme import (
