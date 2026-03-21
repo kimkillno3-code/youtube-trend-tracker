@@ -73,25 +73,31 @@ class YouTubeAPIClient:
         return response.get("items", [])
 
     def search_videos(
-        self, query: str, max_results: int = 25, order: str = "viewCount",
+        self, query: str = "", max_results: int = 25, order: str = "viewCount",
         published_after: Optional[str] = None, region_code: str = "KR",
         video_duration: Optional[str] = None,
+        relevance_language: Optional[str] = None,
+        video_category_id: Optional[str] = None,
     ) -> list[dict]:
         """키워드 검색 (search.list) - 100 유닛/호출"""
         def _call():
+            lang = relevance_language or {"KR": "ko", "US": "en", "JP": "ja"}.get(region_code, "ko")
             params = {
                 "part": "snippet",
-                "q": query,
                 "type": "video",
                 "regionCode": region_code,
-                "relevanceLanguage": "ko",
+                "relevanceLanguage": lang,
                 "maxResults": min(max_results, 50),
                 "order": order,
             }
+            if query:
+                params["q"] = query
             if published_after:
                 params["publishedAfter"] = published_after
             if video_duration:
                 params["videoDuration"] = video_duration
+            if video_category_id:
+                params["videoCategoryId"] = video_category_id
             return self.youtube.search().list(**params).execute()
 
         self._track_quota("search.list")

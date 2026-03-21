@@ -120,6 +120,31 @@ class TrendRepository:
         finally:
             conn.close()
 
+    def get_trending_by_period(self, period: str = "1w", limit: int = 50) -> list[dict]:
+        """기간별 인기 영상 집계 (등장 횟수 + 최대 조회수 기준).
+
+        period: "1w" (7일) | "1m" (30일) | "3m" (90일)
+        """
+        days_map = {"1w": 7, "1m": 30, "3m": 90}
+        days = days_map.get(period, 7)
+        conn = self._conn()
+        try:
+            cutoff = (datetime.now() - timedelta(days=days)).isoformat()
+            rows = conn.execute(
+                """SELECT *, COUNT(*) AS appearance_count,
+                          MAX(view_count) AS max_views
+                FROM trending_videos
+                WHERE collected_at >= ?
+                GROUP BY video_id
+                HAVING collected_at = MAX(collected_at)
+                ORDER BY appearance_count DESC, max_views DESC
+                LIMIT ?""",
+                (cutoff, limit),
+            ).fetchall()
+            return [dict(r) for r in rows]
+        finally:
+            conn.close()
+
     def get_all_trending_deduplicated(self) -> list[dict]:
         """누적 수집된 전체 트렌딩 영상 (video_id 중복 제거, 최신 수집분 우선)."""
         conn = self._conn()

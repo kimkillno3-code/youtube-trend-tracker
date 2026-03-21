@@ -153,3 +153,25 @@ def get_seasonal_by_week(weeks_ahead: int = 6) -> dict:
             ]
 
     return result
+
+
+def get_full_year_keywords(start_month=None) -> dict:
+    """현재월부터 12개월 키워드 반환 (월별 그룹).
+
+    Returns:
+        {"3월": [keywords...], "4월": [...], ...}  (현재월 기준 순환)
+    """
+    if start_month is None:
+        start_month = datetime.now().month
+
+    result = {}
+    for i in range(12):
+        month = (start_month - 1 + i) % 12 + 1
+        events = KOREAN_SEASONAL_EVENTS.get(month, [])
+        label = f"{month}월"
+        result[label] = [
+            {"keyword": e["keyword"], "confidence": e["confidence"],
+             "category": e["category"]}
+            for e in events
+        ]
+    return result

@@ -282,117 +282,118 @@ with tab_gap:
 # 탭 3: 시즌 캘린더
 # ══════════════════════════════════════
 with tab_season:
-    st.caption("향후 6주간 예상되는 시즌 키워드를 미리 확인하세요")
+    st.caption("현재월부터 12개월간 예상 시즌 키워드 + Google Trends 실시간 연관 검색어")
 
-    from src.analysis.seasonal import get_upcoming_seasonal_keywords
+    from src.analysis.seasonal import get_full_year_keywords
 
-    # 상위 키워드 지표
-    upcoming = get_upcoming_seasonal_keywords(weeks_ahead=6)
-    if upcoming:
-        m1, m2, m3 = st.columns(3)
-        with m1:
-            st.markdown(render_metric_card(
-                f"{len(upcoming)}개", "예상 시즌 키워드", "purple",
-            ), unsafe_allow_html=True)
-        with m2:
-            top_kw = upcoming[0]["keyword"] if upcoming else "-"
-            st.markdown(render_metric_card(
-                top_kw, "가장 유력한 키워드", "red",
-                hint=f"신뢰도 {upcoming[0]['confidence']}%" if upcoming else "",
-            ), unsafe_allow_html=True)
-        with m3:
-            cats = list({k["category"] for k in upcoming})
-            st.markdown(render_metric_card(
-                f"{len(cats)}개", "카테고리 분포", "blue",
-            ), unsafe_allow_html=True)
+    year_keywords = get_full_year_keywords()
 
-    # 타임라인 시각화
-    if upcoming:
-        # 월별 그룹핑 (피크 월 기준)
-        month_groups = {}
-        for kw in upcoming:
-            m = kw["peak_month"]
-            month_groups.setdefault(m, []).append(kw)
+    # 지표 요약
+    total_kw = sum(len(v) for v in year_keywords.values())
+    all_cats = {kw["category"] for kws in year_keywords.values() for kw in kws}
+    m1, m2, m3 = st.columns(3)
+    with m1:
+        st.markdown(render_metric_card(
+            f"{total_kw}개", "12개월 시즌 키워드", "purple",
+        ), unsafe_allow_html=True)
+    with m2:
+        st.markdown(render_metric_card(
+            "12개월", "예측 범위", "red",
+        ), unsafe_allow_html=True)
+    with m3:
+        st.markdown(render_metric_card(
+            f"{len(all_cats)}개", "카테고리", "blue",
+        ), unsafe_allow_html=True)
 
-        month_options = [f"{m}월" for m in sorted(month_groups.keys())]
-        selected_month = st.pills(
-            "월 선택", month_options,
-            default=month_options[0],
-            key="season_month_select",
-        )
-        inject_pills_highlight(
-            [selected_month] if selected_month else [],
-            group_index=0,
-        )
+    # 월 선택 필터
+    month_labels = list(year_keywords.keys())
+    selected_month = st.pills(
+        "월 선택", month_labels,
+        default=month_labels[0],
+        key="season_month_select",
+    )
+    inject_pills_highlight(
+        [selected_month] if selected_month else [],
+        group_index=0,
+    )
 
-        sel_num = int(selected_month.replace("월", "")) if selected_month else sorted(month_groups.keys())[0]
-        kws = sorted(month_groups.get(sel_num, []), key=lambda k: -k["confidence"])
+    sel_month = selected_month if selected_month else month_labels[0]
+    kws = sorted(year_keywords.get(sel_month, []), key=lambda k: -k["confidence"])
 
-        CAT_COLORS = {
-            "시즌": "#3B82F6", "여행": "#10B981", "교육": "#F59E0B",
-            "이벤트": "#FF4757", "전통": "#A78BFA", "엔터": "#EC4899",
-            "패션": "#F472B6", "라이프": "#6EE7B7", "레저": "#22D3EE",
-            "날씨": "#64748B", "건강": "#34D399", "가전": "#94A3B8",
-            "음식": "#FB923C", "쇼핑": "#E879F9", "경제": "#FBBF24",
-            "스포츠": "#38BDF8",
-        }
+    CAT_COLORS = {
+        "시즌": "#3B82F6", "여행": "#10B981", "교육": "#F59E0B",
+        "이벤트": "#FF4757", "전통": "#A78BFA", "엔터": "#EC4899",
+        "패션": "#F472B6", "라이프": "#6EE7B7", "레저": "#22D3EE",
+        "날씨": "#64748B", "건강": "#34D399", "가전": "#94A3B8",
+        "음식": "#FB923C", "쇼핑": "#E879F9", "경제": "#FBBF24",
+        "스포츠": "#38BDF8",
+    }
 
+    if kws:
+        # 신뢰도 차트
         layout = get_plotly_layout()
         fig = go.Figure()
-
-        y_labels = []
-        x_vals = []
-        colors = []
-        hover_texts = []
-        text_labels = []
-
-        for kw in kws:
-            label = f"{kw['keyword']}  ({kw['category']})"
-            y_labels.append(label)
-            x_vals.append(kw["confidence"])
-            colors.append(CAT_COLORS.get(kw["category"], "#6B7280"))
-            weeks = kw["weeks_until"]
-            hover_texts.append(
-                f"<b>{kw['keyword']}</b><br>"
-                f"카테고리: {kw['category']}<br>"
-                f"신뢰도: {kw['confidence']}%<br>"
-                f"{weeks}주 후"
-            )
-            text_labels.append(f"  {kw['confidence']}%  ·  {weeks}주 후")
+        y_labels = [f"{kw['keyword']}  ({kw['category']})" for kw in kws]
+        x_vals = [kw["confidence"] for kw in kws]
+        colors = [CAT_COLORS.get(kw["category"], "#6B7280") for kw in kws]
+        text_labels = [f"  {kw['confidence']}%" for kw in kws]
 
         fig.add_trace(go.Bar(
-            y=y_labels,
-            x=x_vals,
-            orientation="h",
-            marker=dict(
-                color=colors,
-                line=dict(width=0),
-                opacity=0.85,
-            ),
-            text=text_labels,
-            textposition="outside",
-            textfont=dict(size=11),
-            hovertext=hover_texts,
+            y=y_labels, x=x_vals, orientation="h",
+            marker=dict(color=colors, line=dict(width=0), opacity=0.85),
+            text=text_labels, textposition="outside", textfont=dict(size=11),
             hoverinfo="text",
+            hovertext=[
+                f"<b>{kw['keyword']}</b><br>카테고리: {kw['category']}<br>신뢰도: {kw['confidence']}%"
+                for kw in kws
+            ],
         ))
-
         fig.update_layout(
             **layout,
             height=max(280, len(y_labels) * 42 + 60),
-            xaxis=dict(
-                title="신뢰도 (%)",
-                range=[0, 115],
-                showgrid=True,
-                gridcolor="rgba(255,255,255,0.06)",
-                dtick=20,
-            ),
-            yaxis=dict(
-                tickfont=dict(size=12),
-            ),
-            showlegend=False,
-            bargap=0.3,
+            xaxis=dict(title="신뢰도 (%)", range=[0, 115], showgrid=True,
+                        gridcolor="rgba(255,255,255,0.06)", dtick=20),
+            yaxis=dict(tickfont=dict(size=12)),
+            showlegend=False, bargap=0.3,
         )
         st.plotly_chart(fig, use_container_width=True)
+
+        # Google Trends 연관 검색어
+        st.divider()
+        render_section_title(f"{sel_month} 키워드 — Google Trends 연관 검색어")
+        sel_kw = st.selectbox(
+            "키워드 선택", [kw["keyword"] for kw in kws],
+            key="season_gtrends_kw",
+        )
+        if sel_kw:
+            try:
+                from src.collector.google_trends import get_related_queries
+                with st.spinner(f"'{sel_kw}' 연관 검색어 조회 중..."):
+                    related = get_related_queries(sel_kw)
+                col_rise, col_top = st.columns(2)
+                with col_rise:
+                    render_section_title("급상승 연관 검색어")
+                    if related.get("rising"):
+                        for q in related["rising"][:10]:
+                            st.markdown(
+                                f"**{q['query']}** · "
+                                f"<span style='color:#36D399'>{q.get('value', '')}</span>",
+                                unsafe_allow_html=True,
+                            )
+                    else:
+                        st.caption("데이터 없음")
+                with col_top:
+                    render_section_title("인기 연관 검색어")
+                    if related.get("top"):
+                        for q in related["top"][:10]:
+                            st.markdown(
+                                f"**{q['query']}** · {q.get('value', '')}",
+                                unsafe_allow_html=True,
+                            )
+                    else:
+                        st.caption("데이터 없음")
+            except Exception as e:
+                st.warning(f"Google Trends 조회 실패: {e}")
     else:
         render_empty_state(
             "시즌 키워드가 없어요",

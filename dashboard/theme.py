@@ -956,6 +956,29 @@ def inject_custom_css():
         .page-header h1 { font-size: 1.25rem; }
         .metric-card .metric-value { font-size: 1.25rem; }
         .vgrid .vg-body { padding: 12px 14px; }
+
+        /* Streamlit 컬럼 → 세로 스택 (영상 그리드 1컬럼) */
+        [data-testid="stHorizontalBlock"] {
+            flex-wrap: wrap !important;
+        }
+        [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+            width: 100% !important;
+            flex: 1 1 100% !important;
+            min-width: 100% !important;
+        }
+
+        /* 지표 카드: 2×2 그리드 유지 */
+        [data-testid="stHorizontalBlock"]:has(> [data-testid="stColumn"] .metric-card) > [data-testid="stColumn"] {
+            width: 50% !important;
+            flex: 1 1 48% !important;
+            min-width: 48% !important;
+        }
+
+        /* 탭 폰트 축소 */
+        .stTabs [data-baseweb="tab"] {
+            padding: 8px 14px !important;
+            font-size: 0.78rem !important;
+        }
     }
     </style>
     """, unsafe_allow_html=True)

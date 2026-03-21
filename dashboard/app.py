@@ -13,7 +13,10 @@ sys.path.insert(0, str(ROOT))
 
 from src.config import YOUTUBE_API_KEY, YOUTUBE_DAILY_QUOTA, DB_PATH, DATA_DIR, KST
 from src.collector.youtube_api import YouTubeAPIClient
-from src.collector.trending import collect_trending, save_snapshots
+from src.collector.trending import (
+    collect_trending, collect_trending_by_category,
+    collect_popular_by_period, save_snapshots, MAIN_CATEGORIES, COUNTRIES,
+)
 from src.database.repository import TrendRepository
 from src.analysis.insights import generate_insights
 from dashboard.theme import (
@@ -136,6 +139,74 @@ def do_weekly_trend():
         _handle_api_error(e, log_id, api.quota_used)
 
 
+def do_category_realtime_collect(cat_id: int, cat_name: str, region_code: str = "KR"):
+    """카테고리별 실시간 인기 영상 (videos.list chart=mostPopular + videoCategoryId) — 1유닛"""
+    if not YOUTUBE_API_KEY:
+        st.error(
+            "YouTube API 키가 설정되지 않았어요.\n\n"
+            "1. [Google Cloud Console](https://console.cloud.google.com/)에서 API 키 발급\n"
+            "2. 프로젝트 루트에 `.env` 파일 생성\n"
+            "3. `YOUTUBE_API_KEY=발급받은키` 입력 후 저장"
+        )
+        return
+    if not _check_quota_budget(10):
+        return
+    api = YouTubeAPIClient(YOUTUBE_API_KEY)
+    collected_at = datetime.now(KST).isoformat()
+    source_type = f"cat_{region_code}_{cat_id}_realtime"
+    log_id = repo.log_start(source_type)
+    country = COUNTRIES.get(region_code, region_code)
+    try:
+        with st.spinner(f"{country} {cat_name} 실시간 인기 영상을 가져오고 있어요..."):
+            videos = collect_trending_by_category(
+                api, category_id=cat_id, max_results=30, region_code=region_code,
+            )
+            saved = repo.save_trending_videos(videos, collected_at, source_type=source_type)
+            save_snapshots(repo, videos)
+            repo.log_end(log_id, "success", saved, api.quota_used)
+        if saved > 0:
+            st.toast(f"{country} {cat_name} 인기 영상 {saved}개를 가져왔어요")
+        else:
+            st.toast("이미 수집된 영상이에요")
+    except Exception as e:
+        _handle_api_error(e, log_id, api.quota_used)
+
+
+def do_category_period_collect(cat_id: int, cat_name: str, period: str, days: int,
+                               region_code: str = "KR"):
+    """카테고리별 기간 인기 영상 (search.list + category_name) — 100유닛"""
+    if not YOUTUBE_API_KEY:
+        st.error(
+            "YouTube API 키가 설정되지 않았어요.\n\n"
+            "1. [Google Cloud Console](https://console.cloud.google.com/)에서 API 키 발급\n"
+            "2. 프로젝트 루트에 `.env` 파일 생성\n"
+            "3. `YOUTUBE_API_KEY=발급받은키` 입력 후 저장"
+        )
+        return
+    if not _check_quota_budget(200):
+        return
+    api = YouTubeAPIClient(YOUTUBE_API_KEY)
+    collected_at = datetime.now(KST).isoformat()
+    source_type = f"cat_{region_code}_{cat_id}_period_{period}"
+    log_id = repo.log_start(source_type)
+    country = COUNTRIES.get(region_code, region_code)
+    try:
+        with st.spinner(f"{country} {cat_name} 최근 {days}일 인기 영상을 가져오고 있어요..."):
+            videos = collect_popular_by_period(
+                api, days=days, max_results=30, category_name=cat_name,
+                region_code=region_code, category_id=cat_id,
+            )
+            saved = repo.save_trending_videos(videos, collected_at, source_type=source_type)
+            save_snapshots(repo, videos)
+            repo.log_end(log_id, "success", saved, api.quota_used)
+        if saved > 0:
+            st.toast(f"{country} {cat_name} 최근 {days}일 인기 영상 {saved}개를 가져왔어요")
+        else:
+            st.toast("이미 수집된 영상이에요")
+    except Exception as e:
+        _handle_api_error(e, log_id, api.quota_used)
+
+
 # ── 탭별 영상 목록 렌더링 (공통) ──
 def render_tab_content(videos, source_label, cat_key, rank_field="trending_rank", pills_group=0):
     """탭 내부: 지표 → 카테고리 필터 → 영상 그리드"""
@@ -225,35 +296,64 @@ else:
     subtitle = "첫 트렌드 분석을 시작해보세요"
 render_page_header("트렌드 대시보드", subtitle)
 
-# ── 탭 ──
-tab_realtime, tab_weekly, tab_analysis = st.tabs(["실시간 트렌드", "주간 인기", "분석 리포트"])
+# ── 국가 + 카테고리 선택 ──
+_country_labels = list(COUNTRIES.values())   # ["한국", "일본", "미국"]
+_country_codes = list(COUNTRIES.keys())      # ["KR", "JP", "US"]
+_label_to_code = {v: k for k, v in COUNTRIES.items()}
+
+_cat_names = list(MAIN_CATEGORIES.values())
+_cat_ids = list(MAIN_CATEGORIES.keys())
+_cat_name_to_id = {v: k for k, v in MAIN_CATEGORIES.items()}
+
+col_country, col_cat = st.columns([1, 3])
+with col_country:
+    _sel_country_label = st.selectbox("국가", _country_labels, key="country_select")
+with col_cat:
+    selected_cat_name = st.selectbox("카테고리", _cat_names, key="cat_select")
+
+_sel_region = _label_to_code.get(_sel_country_label, "KR")
+_sel_cat_id = _cat_name_to_id.get(selected_cat_name, _cat_ids[0])
+_sel_cat_name = MAIN_CATEGORIES.get(_sel_cat_id, _cat_names[0])
+
+# ── 기간 탭 ──
+tab_realtime, tab_1w, tab_1m, tab_3m, tab_analysis = st.tabs(
+    ["실시간", "1주", "30일", "3개월", "분석 리포트"]
+)
 
 with tab_realtime:
-    if st.button("실시간 인기 영상 가져오기", type="primary", use_container_width=False):
-        do_realtime_collect()
-    realtime_videos = repo.get_latest_by_source("realtime", limit=30)
-    if realtime_videos:
-        render_freshness_bar(realtime_videos[0].get("collected_at", ""))
-    render_tab_content(realtime_videos, "실시간", "realtime_cat_filter", pills_group=0)
+    if st.button(
+        f"{_sel_country_label} {_sel_cat_name} 실시간 인기 영상 가져오기",
+        type="primary", use_container_width=False,
+    ):
+        do_category_realtime_collect(_sel_cat_id, _sel_cat_name, _sel_region)
+    _rt_source = f"cat_{_sel_region}_{_sel_cat_id}_realtime"
+    _rt_videos = repo.get_latest_by_source(_rt_source, limit=30)
+    if _rt_videos:
+        render_freshness_bar(_rt_videos[0].get("collected_at", ""))
+    render_tab_content(_rt_videos, f"{_sel_country_label} {_sel_cat_name} 실시간", "rt_cat_filter", pills_group=0)
 
-with tab_weekly:
-    if st.button("주간 인기 영상 분석", type="primary", use_container_width=False):
-        do_weekly_trend()
-    st.caption("현재 인기 급상승 영상 50개를 조회수 기준으로 정렬하여 TOP 30을 보여줍니다.")
-    weekly_videos = repo.get_latest_by_source("weekly", limit=30)
-    if weekly_videos:
-        render_freshness_bar(weekly_videos[0].get("collected_at", ""))
-    if weekly_videos and realtime_videos:
-        realtime_ids = {v["video_id"] for v in realtime_videos}
-        overlap_count = sum(1 for v in weekly_videos if v["video_id"] in realtime_ids)
-        if overlap_count > 0:
-            hide_dup = st.toggle(
-                f"실시간 중복 제외 ({overlap_count}개)",
-                key="hide_weekly_dup",
+_PERIOD_META = {
+    "1w": {"label": "1주", "days": 7, "tab": tab_1w, "group": 1},
+    "1m": {"label": "30일", "days": 30, "tab": tab_1m, "group": 2},
+    "3m": {"label": "3개월", "days": 90, "tab": tab_3m, "group": 3},
+}
+for _period, _meta in _PERIOD_META.items():
+    with _meta["tab"]:
+        if st.button(
+            f"{_sel_country_label} {_sel_cat_name} 최근 {_meta['days']}일 인기 영상 가져오기",
+            key=f"btn_{_period}", type="primary", use_container_width=False,
+        ):
+            do_category_period_collect(
+                _sel_cat_id, _sel_cat_name, _period, _meta["days"], _sel_region,
             )
-            if hide_dup:
-                weekly_videos = [v for v in weekly_videos if v["video_id"] not in realtime_ids]
-    render_tab_content(weekly_videos, "주간", "weekly_cat_filter", pills_group=1)
+        _source = f"cat_{_sel_region}_{_sel_cat_id}_period_{_period}"
+        _videos = repo.get_latest_by_source(_source, limit=30)
+        if _videos:
+            render_freshness_bar(_videos[0].get("collected_at", ""))
+        render_tab_content(
+            _videos, f"{_sel_country_label} {_sel_cat_name} {_meta['label']}",
+            f"{_period}_cat_filter", pills_group=_meta["group"],
+        )
 
 with tab_analysis:
     all_videos = repo.get_all_trending_deduplicated()
